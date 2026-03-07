@@ -11,14 +11,6 @@ type Response struct {
 	Msg  string      `json:"msg"`
 }
 
-const (
-	SUCCESS      = 0
-	ERROR        = 1
-	UNAUTHORIZED = 401
-	FORBIDDEN    = 403
-	NOT_FOUND    = 404
-)
-
 func Result(c *gin.Context, code int, data interface{}, msg string) {
 	c.JSON(http.StatusOK, Response{
 		Code: code,
@@ -28,28 +20,48 @@ func Result(c *gin.Context, code int, data interface{}, msg string) {
 }
 
 func Success(c *gin.Context) {
-	Result(c, SUCCESS, nil, "操作成功")
+	c.JSON(http.StatusOK, Response{
+		Code: 0,
+		Data: nil,
+		Msg:  "操作成功",
+	})
 }
 
 func SuccessWithData(c *gin.Context, data interface{}) {
-	Result(c, SUCCESS, data, "操作成功")
+	c.JSON(http.StatusOK, Response{
+		Code: 0,
+		Data: data,
+		Msg:  "操作成功",
+	})
 }
 
 func SuccessWithMessage(c *gin.Context, message string) {
-	Result(c, SUCCESS, nil, message)
+	c.JSON(http.StatusOK, Response{
+		Code: 0,
+		Data: nil,
+		Msg:  message,
+	})
 }
 
 func Error(c *gin.Context) {
-	Result(c, ERROR, nil, "操作失败")
+	c.JSON(http.StatusOK, Response{
+		Code: 1,
+		Data: nil,
+		Msg:  "操作失败",
+	})
 }
 
 func ErrorWithMessage(c *gin.Context, message string) {
-	Result(c, ERROR, nil, message)
+	c.JSON(http.StatusOK, Response{
+		Code: 1,
+		Data: nil,
+		Msg:  message,
+	})
 }
 
 func Unauthorized(c *gin.Context, message string) {
 	c.JSON(http.StatusUnauthorized, Response{
-		Code: UNAUTHORIZED,
+		Code: 401,
 		Data: nil,
 		Msg:  message,
 	})
@@ -57,15 +69,7 @@ func Unauthorized(c *gin.Context, message string) {
 
 func Forbidden(c *gin.Context, message string) {
 	c.JSON(http.StatusForbidden, Response{
-		Code: FORBIDDEN,
-		Data: nil,
-		Msg:  message,
-	})
-}
-
-func NotFound(c *gin.Context, message string) {
-	c.JSON(http.StatusNotFound, Response{
-		Code: NOT_FOUND,
+		Code: 403,
 		Data: nil,
 		Msg:  message,
 	})

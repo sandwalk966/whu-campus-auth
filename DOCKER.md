@@ -103,6 +103,8 @@ curl http://localhost/health
 - `mysql-data`: MySQL 数据库文件
 - `redis-data`: Redis 数据文件
 - `./uploads`: 上传的文件（本地目录挂载）
+- `./ssl`: SSL 证书文件
+- `./certbot-www`: Let's Encrypt 验证文件
 
 ## 环境变量
 
@@ -150,52 +152,47 @@ docker-compose up -d
 ## 生产环境建议
 
 ### 1. HTTPS 配置
-在 `nginx/nginx.conf` 中添加 SSL 证书配置：
 
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name yourdomain.com;
-    
-    ssl_certificate /etc/nginx/ssl/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-    
-    # ... 其他配置
-}
+**开发环境**：使用自签名证书
+```bash
+chmod +x scripts/generate-ssl-cert.sh
+./scripts/generate-ssl-cert.sh
+docker-compose up -d
 ```
 
-然后挂载证书：
-```yaml
-volumes:
-  - ./ssl:/etc/nginx/ssl:ro
+**生产环境**：使用 Let's Encrypt 证书
+```bash
+chmod +x scripts/letsencrypt.sh
+./scripts/letsencrypt.sh yourdomain.com your@email.com apply
+docker-compose up -d
 ```
+
+详细说明请参考：[LETS-ENCRYPT.md](LETS-ENCRYPT.md)
 
 ### 2. 日志轮转
 配置 Nginx 日志轮转，避免日志文件过大。
 
 ### 3. 资源限制
-在 `docker-compose.yml` 中添加资源限制：
-```yaml
-services:
-  app:
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-```
+
+已在 `docker-compose.yml` 中配置资源限制：
+
+| 服务 | CPU 限制 | 内存限制 |
+|------|---------|---------|
+| Nginx | 0.5 | 128M |
+| App | 1.0 | 512M |
+| MySQL | 1.0 | 1G |
+| Redis | 0.5 | 256M |
 
 ### 4. 健康检查
-添加健康检查配置：
-```yaml
-services:
-  app:
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8888/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-```
+
+已在 `docker-compose.yml` 中配置健康检查：
+
+| 服务 | 检查方式 | 间隔 |
+|------|---------|------|
+| Nginx | 脚本检查 | 30s |
+| App | HTTP 检查 | 30s |
+| MySQL | MySQL ping | 30s |
+| Redis | Redis ping | 30s |
 
 ## 性能优化
 

@@ -46,7 +46,24 @@ whu-campus-auth/
 │   └── redis.go
 ├── router/              # 路由
 │   └── router.go
+├── initializer/         # 初始化模块
+│   ├── database.go      # 数据库初始化
+│   ├── migrator.go      # 数据库迁移
+│   ├── initializer.go   # 字典数据初始化
+│   └── redis.go         # Redis 和日志初始化
+├── scripts/             # 运维脚本
+│   ├── letsencrypt.sh   # Let's Encrypt 证书管理
+│   ├── generate-ssl-cert.sh  # 自签名证书生成
+│   ├── monitor-logs.sh  # 日志监控
+│   └── monitor-performance.sh  # 性能监控
+├── nginx/               # Nginx 配置
+│   ├── nginx.conf       # Nginx 配置文件
+│   └── healthcheck.sh   # 健康检查脚本
+├── ssl/                 # SSL 证书目录（自动生成）
 ├── uploads/             # 上传文件目录
+├── docker-compose.yml   # Docker Compose 配置
+├── .env                 # 环境变量
+├── .dockerignore        # Docker 构建忽略文件
 ├── go.mod
 ├── go.sum
 └── .env
@@ -59,6 +76,25 @@ whu-campus-auth/
 - Go 1.25+
 - MySQL 5.7+
 - Redis (可选)
+- Docker & Docker Compose（推荐）
+
+### 方式一：Docker 部署（推荐）
+
+```bash
+# 1. 启动所有服务
+docker-compose up -d --build
+
+# 2. 查看日志
+docker-compose logs -f
+
+# 3. 访问服务
+# HTTP: http://localhost
+# HTTPS: https://localhost（自签名证书，浏览器会提示警告）
+```
+
+**详细说明**：[DOCKER.md](DOCKER.md)
+
+### 方式二：本地运行
 
 ### 安装依赖
 
@@ -140,6 +176,15 @@ go run main.go
 - **认证**: JWT
 - **缓存**: Redis (可选)
 - **密码加密**: bcrypt
+- **反向代理**: Nginx
+- **容器化**: Docker & Docker Compose
+
+## 文档
+
+- [Docker 部署说明](DOCKER.md)
+- [Let's Encrypt 证书管理](LETS-ENCRYPT.md)
+- [Docker 优化指南](DOCKER-OPTIMIZATION.md)
+- [运维脚本说明](scripts/README.md)
 
 ## License
 

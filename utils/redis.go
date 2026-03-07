@@ -26,18 +26,6 @@ func InitRedis() error {
 	return nil
 }
 
-func SetCache(key string, value interface{}, expiration int) error {
-	return RedisClient.Set(context.Background(), key, value, 0).Err()
-}
-
-func GetCache(key string) (string, error) {
-	return RedisClient.Get(context.Background(), key).Result()
-}
-
-func DeleteCache(key string) error {
-	return RedisClient.Del(context.Background(), key).Err()
-}
-
 func CloseRedis() error {
 	if RedisClient != nil {
 		return RedisClient.Close()

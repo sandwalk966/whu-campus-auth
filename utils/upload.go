@@ -28,17 +28,6 @@ func GetFilePath(fileName string) string {
 	return filepath.Join(GetUploadDir(), fileName)
 }
 
-func IsValidImageType(fileName string) bool {
-	validExts := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
-	ext := strings.ToLower(filepath.Ext(fileName))
-	for _, validExt := range validExts {
-		if ext == validExt {
-			return true
-		}
-	}
-	return false
-}
-
 func IsValidFileType(fileName string) bool {
 	validExts := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".zip", ".rar"}
 	ext := strings.ToLower(filepath.Ext(fileName))

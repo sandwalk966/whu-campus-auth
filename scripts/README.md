@@ -43,6 +43,88 @@
 
 ---
 
+### 3. **letsencrypt.sh** - Let's Encrypt 证书管理 ⭐
+
+自动申请和续期 Let's Encrypt HTTPS 证书。
+
+#### 使用方法
+
+```bash
+# 申请新证书
+./letsencrypt.sh yourdomain.com your@email.com apply
+
+# 续期证书
+./letsencrypt.sh yourdomain.com your@email.com renew
+
+# 生成 Nginx 配置
+./letsencrypt.sh yourdomain.com your@email.com config
+```
+
+#### 功能
+
+- ✅ 自动申请 Let's Encrypt 证书
+- ✅ 自动续期证书
+- ✅ 自动生成 Nginx 配置
+- ✅ 按需运行，不占用资源
+
+详细说明：[LETS-ENCRYPT.md](../LETS-ENCRYPT.md)
+
+---
+
+### 4. **generate-ssl-cert.sh** - 自签名证书生成
+
+生成自签名 SSL 证书（开发/测试环境使用）。
+
+#### 使用方法
+
+```bash
+./generate-ssl-cert.sh
+```
+
+#### 功能
+
+- ✅ 生成自签名证书
+- ✅ 适用于开发/测试环境
+- ✅ 证书有效期 365 天
+
+---
+
+### 5. **monitor-logs.sh** - 日志监控
+
+监控 Docker 容器日志，检测错误和异常。
+
+#### 使用方法
+
+```bash
+./monitor-logs.sh [container_name]
+```
+
+#### 功能
+
+- ✅ 实时检测 ERROR/FATAL/PANIC 日志
+- ✅ 检测性能问题（timeout/slow/memory）
+- ✅ 支持集成告警通知
+
+---
+
+### 6. **monitor-performance.sh** - 性能监控
+
+监控 Docker 容器的资源使用情况。
+
+#### 使用方法
+
+```bash
+./monitor-performance.sh
+```
+
+#### 功能
+
+- ✅ 显示容器资源使用（CPU、内存、网络）
+- ✅ 检查服务状态
+- ✅ 检查健康状态
+
+---
+
 ## 🔧 Nginx 配置
 
 ### HTTP + HTTPS 配置
@@ -57,99 +139,26 @@ Nginx 同时配置了 HTTP（80 端口）和 HTTPS（443 端口）。
 - ✅ 反向代理到后端应用
 - ✅ 静态文件服务
 - ✅ 健康检查端点
+- ✅ Gzip 压缩
+- ✅ 浏览器缓存
 
-### HTTPS 证书配置（手动）
+### HTTPS 证书配置
 
-证书文件需要手动放置到 `ssl/` 目录。
-
-#### 1. 准备证书文件
-
-你需要准备两个证书文件：
-- `fullchain.pem` - 证书文件（包含证书链）
-- `privkey.pem` - 私钥文件
-
-**证书来源**（任选其一）：
-- **Let's Encrypt**（免费，推荐）：使用 Certbot 申请
-- **云服务商**：阿里云、腾讯云等提供的免费证书
-- **购买商业证书**：DigiCert、GlobalSign 等
-
-#### 2. 放置证书文件
-
-将证书文件放到项目根目录的 `ssl/` 文件夹：
-
-```
-whu-campus-auth/
-├── ssl/
-│   ├── fullchain.pem    ← 你的证书文件
-│   └── privkey.pem      ← 你的私钥文件
-├── docker-compose.yml
-└── nginx/
-    └── nginx.conf
-```
-
-**注意**：
-- ✅ 文件名必须是 `fullchain.pem` 和 `privkey.pem`
-- ✅ 确保私钥文件权限安全（不要提交到 Git）
-- ✅ `.gitignore` 已配置忽略 `ssl/` 目录
-
-#### 3. 配置域名（可选）
-
-编辑 `nginx/nginx.conf`，修改 `server_name`：
-
-```nginx
-# HTTP server
-server_name yourdomain.com www.yourdomain.com;
-
-# HTTPS server
-server_name yourdomain.com www.yourdomain.com;
-```
-
-#### 4. 启用 HTTP→HTTPS 跳转（可选）
-
-编辑 `nginx/nginx.conf`，在 HTTP server 块中取消注释：
-
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-    
-    # 取消注释这行
-    return 301 https://$server_name$request_uri;
-}
-```
-
-#### 5. 启动服务
+#### 开发环境：自签名证书
 
 ```bash
-docker-compose down
+./generate-ssl-cert.sh
 docker-compose up -d
 ```
 
-#### 6. 验证
+#### 生产环境：Let's Encrypt 证书
 
 ```bash
-# 测试 HTTP
-curl -I http://yourdomain.com/health
-
-# 测试 HTTPS
-curl -kI https://yourdomain.com/health
-
-# 查看证书信息
-openssl s_client -connect yourdomain.com:443 -servername yourdomain.com
+./letsencrypt.sh yourdomain.com your@email.com apply
+docker-compose up -d
 ```
 
-### 证书续期
-
-证书到期后，只需替换 `ssl/` 目录下的文件，然后重启 Nginx：
-
-```bash
-# 替换证书文件
-cp /path/to/new/fullchain.pem ./ssl/
-cp /path/to/new/privkey.pem ./ssl/
-
-# 重启服务
-docker-compose restart nginx
-```
+详细说明：[LETS-ENCRYPT.md](../LETS-ENCRYPT.md)
 
 ---
 

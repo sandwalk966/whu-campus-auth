@@ -1,29 +1,40 @@
 package middleware
 
 import (
+	"context"
+	"whu-campus-auth/config"
+
 	"gorm.io/gorm"
-	"github.com/gin-gonic/gin"
 )
 
-// DBMiddleware 数据库中间件，将 db 连接放入 context
-func DBMiddleware(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set(DBContextKey, db)
-		c.Next()
-	}
+var globalDB *gorm.DB
+
+// InitDB 初始化全局数据库连接（在 main.go 中调用）
+func InitDB(db *gorm.DB) {
+	globalDB = db
 }
 
-// GetDB 从 context 中获取数据库连接
-func GetDB(c *gin.Context) *gorm.DB {
-	db, exists := c.Get(DBContextKey)
-	if !exists {
-		panic("数据库连接未初始化，请确保使用了 DBMiddleware")
+// GetDB 获取全局数据库连接
+func GetDB() *gorm.DB {
+	if globalDB == nil {
+		cfg := config.GlobalConfig
+		if cfg == nil {
+			return nil
+		}
+		// 懒加载初始化
+		globalDB = initLazyDB(cfg)
 	}
-	
-	gormDB, ok := db.(*gorm.DB)
-	if !ok {
-		panic("数据库连接类型错误")
-	}
-	
-	return gormDB
+	return globalDB
+}
+
+func initLazyDB(cfg *config.Config) *gorm.DB {
+	// 这里不应该再次初始化，因为 main.go 已经初始化了
+	// 如果到这里，说明程序启动顺序有问题
+	return nil
+}
+
+// GetDBFromContext 从 context 获取数据库连接（备用方案）
+func GetDBFromContext(ctx context.Context) *gorm.DB {
+	db, _ := ctx.Value("db").(*gorm.DB)
+	return db
 }
