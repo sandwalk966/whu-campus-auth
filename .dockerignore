@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 文档
+*.md
+README.md
+
+# 编译产物
+main
+*.exe
+*.dll
+*.so
+
+# 临时文件
+*.log
+*.tmp
+*.swp
+*~
+
+# IDE
+.vscode
+.idea
+*.iml
+
+# 测试文件
+*_test.go
+coverage.out
+
+# 本地配置
+.env.local
+config.local.yaml
+
+# 上传文件（运行时挂载）
+uploads/*
+!uploads/.gitkeep
