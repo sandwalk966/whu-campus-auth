@@ -32,7 +32,6 @@ go.work
 .env.*.local
 
 # Config files that may contain secrets
-config.yaml
 config.local.yaml
 
 # Uploads directory

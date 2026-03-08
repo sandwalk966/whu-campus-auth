@@ -290,7 +290,7 @@ curl -X GET "http://localhost:8888/api/user/list?page=1&page_size=10" \
 
 **接口**: `DELETE /api/user/:id`
 
-**权限**: 已认证用户
+**权限**: 管理员
 
 **路径参数**:
 - `id`: 用户 ID
@@ -316,7 +316,7 @@ curl -X DELETE http://localhost:8888/api/user/1 \
 
 **接口**: `POST /api/user/assign-roles`
 
-**权限**: 已认证用户
+**权限**: 管理员
 
 **请求参数**:
 ```json

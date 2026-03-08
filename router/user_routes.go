@@ -2,6 +2,7 @@ package router
 
 import (
 	"whu-campus-auth/api"
+	"whu-campus-auth/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +15,8 @@ func RegisterUserRoutes(protected *gin.RouterGroup, userAPI *api.UserAPI, upload
 		user.PUT("", userAPI.UpdateUser)
 		user.PUT("/password", userAPI.ChangePassword)
 		user.GET("/list", userAPI.GetUserList)
-		user.DELETE("/:id", userAPI.DeleteUser)
-		user.POST("/assign-roles", userAPI.AssignRoles)
+		user.DELETE("/:id", middleware.IsAdmin(), userAPI.DeleteUser)
+		user.POST("/assign-roles", middleware.IsAdmin(), userAPI.AssignRoles)
 		user.POST("/avatar", userAPI.UploadAvatar)
 	}
 

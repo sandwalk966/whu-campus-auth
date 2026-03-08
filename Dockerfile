@@ -1,7 +1,7 @@
-FROM golang:1.22-alpine
+FROM golang:latest
 
-# 安装必要的工具
-RUN apk add --no-cache tzdata
+# 安装时区数据（Debian 基础镜像）
+RUN apt-get update && apt-get install -y tzdata && rm -rf /var/lib/apt/lists/*
 
 # 设置时区
 ENV TZ=Asia/Shanghai

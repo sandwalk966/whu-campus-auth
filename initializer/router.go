@@ -12,7 +12,6 @@ func InitRouter(deps *Dependencies) *gin.Engine {
 	r := gin.Default()
 
 	// 全局中间件
-	r.Use(middleware.Cors())
 	r.Use(middleware.Logger())
 
 	// 注册认证路由（公开）

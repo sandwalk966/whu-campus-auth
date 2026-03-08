@@ -46,7 +46,9 @@ func main() {
 	// 初始化数据库
 	db := initializer.InitDatabase(cfg)
 	initializer.AutoMigrate(db)
-	initializer.InitDictData(db)
+
+	// 初始化默认管理员账户（先于字典初始化）
+	initializer.InitAdminUser(db)
 
 	// 初始化全局数据库连接（供 middleware 使用）
 	middleware.InitDB(db)

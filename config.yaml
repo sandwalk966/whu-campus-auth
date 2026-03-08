@@ -1,0 +1,36 @@
+# 武汉大学校园权限管理系统配置文件
+
+# 服务器配置
+server:
+  port: 8888
+  mode: debug
+
+# 数据库配置
+database:
+  driver: mysql
+  host: mysql
+  port: 3306
+  dbname: whu_campus_auth
+  username: root
+  password: root
+  max_idle_conns: 10
+  max_open_conns: 100
+
+# Redis 配置
+redis:
+  host: redis
+  port: 6379
+  password: 
+  db: 0
+
+# JWT 配置
+jwt:
+  secret: whu-campus-auth-secret-key-2026
+  expires_time: 7d
+  buffer_time: 1d
+
+# 日志配置
+log:
+  level: info
+  format: json
+  output: stdout
