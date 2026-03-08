@@ -16,7 +16,7 @@ func IsAdmin() gin.HandlerFunc {
 			return
 		}
 
-		db := GetDB()
+		db := GetDB(c)
 		var user dbModel.User
 		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
 			utils.ErrorWithMessage(c, "用户不存在")
@@ -51,7 +51,7 @@ func HasRole(roleCode string) gin.HandlerFunc {
 			return
 		}
 
-		db := GetDB()
+		db := GetDB(c)
 		var user dbModel.User
 		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
 			utils.ErrorWithMessage(c, "用户不存在")
@@ -86,7 +86,7 @@ func HasAnyRole(roleCodes ...string) gin.HandlerFunc {
 			return
 		}
 
-		db := GetDB()
+		db := GetDB(c)
 		var user dbModel.User
 		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
 			utils.ErrorWithMessage(c, "用户不存在")
