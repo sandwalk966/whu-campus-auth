@@ -18,6 +18,16 @@ export function getUserList(params) {
   return request.get('/api/user/list', { params })
 }
 
+// 创建用户
+export function createUser(data) {
+  return request.post('/api/user', data)
+}
+
+// 更新用户
+export function updateUser(data) {
+  return request.put('/api/user', data)
+}
+
 // 删除用户
 export function deleteUser(id) {
   return request.delete(`/api/user/${id}`)

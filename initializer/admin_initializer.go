@@ -1,6 +1,7 @@
 package initializer
 
 import (
+	"os"
 	dbModel "whu-campus-auth/model/db"
 
 	"go.uber.org/zap"
@@ -43,7 +44,11 @@ func InitAdminUser(db *gorm.DB) {
 
 	if result.Error == gorm.ErrRecordNotFound {
 		// 管理员账户不存在，创建之
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+		password := os.Getenv("ADMIN_PASSWORD")
+		if password == "" {
+			password = "admin123"
+		}
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			zap.L().Error("生成密码哈希失败", zap.Error(err))
 			return

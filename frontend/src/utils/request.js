@@ -28,9 +28,9 @@ request.interceptors.response.use(
   response => {
     const res = response.data
     
-    // 如果响应码不是 200，显示错误消息
-    if (res.code !== 200) {
-      ElMessage.error(res.message || '请求失败')
+    // 如果响应码不是 0 或 200，显示错误消息
+    if (res.code !== 0 && res.code !== 200) {
+      ElMessage.error(res.message || res.msg || '请求失败')
       
       // Token 过期或无效，跳转登录页
       if (res.code === 401) {
@@ -39,7 +39,7 @@ request.interceptors.response.use(
         router.push('/login')
       }
       
-      return Promise.reject(new Error(res.message || '请求失败'))
+      return Promise.reject(new Error(res.message || res.msg || '请求失败'))
     }
     
     return res

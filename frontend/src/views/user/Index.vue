@@ -118,7 +118,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserList, deleteUser } from '@/api'
+import { getUserList, createUser, updateUser, deleteUser } from '@/api'
 
 const loading = ref(false)
 const submitLoading = ref(false)
@@ -164,10 +164,13 @@ const loadData = async () => {
       page_size: pagination.pageSize,
       username: searchForm.username
     })
-    tableData.value = res.data.list
-    pagination.total = res.data.total
+    if (res && res.data) {
+      tableData.value = res.data.list || []
+      pagination.total = res.data.total || 0
+    }
   } catch (error) {
-    console.error(error)
+    console.error('加载用户列表失败:', error)
+    ElMessage.error('加载失败：' + (error.message || '未知错误'))
   } finally {
     loading.value = false
   }
@@ -218,19 +221,26 @@ const handleDelete = (row) => {
 
 // 提交
 const handleSubmit = async () => {
-  await formRef.value.validate(async (valid) => {
-    if (valid) {
-      submitLoading.value = true
-      try {
-        // TODO: 调用创建/更新用户 API
-        ElMessage.success('操作成功')
-        dialogVisible.value = false
-        loadData()
-      } catch (error) {
-        console.error(error)
-      } finally {
-        submitLoading.value = false
+  formRef.value.validate(async (valid) => {
+    if (!valid) return
+    
+    submitLoading.value = true
+    try {
+      if (formData.id) {
+        // 更新用户
+        await updateUser(formData)
+        ElMessage.success('更新成功')
+      } else {
+        // 创建用户
+        await createUser(formData)
+        ElMessage.success('创建成功')
       }
+      dialogVisible.value = false
+      loadData()
+    } catch (error) {
+      console.error('提交失败:', error)
+    } finally {
+      submitLoading.value = false
     }
   })
 }

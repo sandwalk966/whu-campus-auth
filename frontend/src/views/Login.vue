@@ -59,8 +59,8 @@ const loginFormRef = ref()
 const loading = ref(false)
 
 const loginForm = reactive({
-  username: 'admin',
-  password: 'admin123'
+  username: '',
+  password: ''
 })
 
 const loginRules = {
@@ -77,9 +77,11 @@ const handleLogin = async () => {
     if (valid) {
       loading.value = true
       try {
-        await userStore.login(loginForm.username, loginForm.password)
-        ElMessage.success('登录成功')
-        router.push('/')
+        const result = await userStore.login(loginForm.username, loginForm.password)
+        if (result.code === 0) {
+          ElMessage.success('登录成功')
+          router.push('/dashboard')
+        }
       } catch (error) {
         console.error(error)
       } finally {

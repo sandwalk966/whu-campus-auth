@@ -55,13 +55,20 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   
+  // 如果要去登录页且已有 token，直接跳转到首页
+  if (to.path === '/login' && userStore.token) {
+    next('/dashboard')
+    return
+  }
+  
+  // 如果要去非登录页但没有 token，跳转到登录页
   if (to.path !== '/login' && !userStore.token) {
     next('/login')
-  } else if (to.path === '/login' && userStore.token) {
-    next('/')
-  } else {
-    next()
+    return
   }
+  
+  // 其他情况正常访问
+  next()
 })
 
 export default router

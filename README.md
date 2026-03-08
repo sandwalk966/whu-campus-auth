@@ -11,6 +11,12 @@ whu-campus-auth/
 ├── config/              # 配置文件
 │   ├── config.go
 │   └── config.yaml
+├── dao/                 # 数据访问层
+│   ├── base_dao.go
+│   ├── user_dao.go
+│   ├── role_dao.go
+│   ├── menu_dao.go
+│   └── dict_dao.go
 ├── api/                 # 接口层（controller）
 │   ├── user.go
 │   ├── role.go
@@ -36,21 +42,33 @@ whu-campus-auth/
 │       ├── dict.go
 │       └── upload.go
 ├── middleware/          # 中间件
-│   ├── jwt.go
-│   ├── cors.go
-│   └── logger.go
+│   ├── jwt.go           # JWT 认证中间件
+│   ├── casbin_rbac.go   # RBAC 权限中间件
+│   ├── db.go            # 数据库连接中间件
+│   └── logger.go        # 日志中间件
 ├── utils/               # 工具类
 │   ├── jwt.go
 │   ├── response.go
 │   ├── upload.go
 │   └── redis.go
-├── router/              # 路由
-│   └── router.go
+├── router/              # 路由配置
+│   ├── auth_routes.go   # 认证路由
+│   ├── user_routes.go   # 用户路由
+│   ├── role_routes.go   # 角色路由
+│   ├── menu_routes.go   # 菜单路由
+│   ├── dict_routes.go   # 字典路由
+│   └── static_routes.go # 静态文件路由
 ├── initializer/         # 初始化模块
+│   ├── initializer.go   # 统一初始化入口
 │   ├── database.go      # 数据库初始化
+│   ├── redis.go         # Redis 初始化
 │   ├── migrator.go      # 数据库迁移
-│   ├── initializer.go   # 字典数据初始化
-│   └── redis.go         # Redis 和日志初始化
+│   ├── admin_initializer.go  # 管理员账户初始化
+│   ├── deps.go          # 依赖注入
+│   ├── api.go           # API 层初始化
+│   ├── dao.go           # DAO 层初始化
+│   ├── service.go       # Service 层初始化
+│   └── router.go        # 路由初始化
 ├── scripts/             # 运维脚本
 │   ├── letsencrypt.sh   # Let's Encrypt 证书管理
 │   ├── generate-ssl-cert.sh  # 自签名证书生成
@@ -61,6 +79,17 @@ whu-campus-auth/
 │   └── healthcheck.sh   # 健康检查脚本
 ├── ssl/                 # SSL 证书目录（自动生成）
 ├── uploads/             # 上传文件目录
+├── frontend/            # 前端项目
+│   ├── src/
+│   │   ├── api/         # API 调用
+│   │   ├── layouts/     # 布局组件
+│   │   ├── router/      # 路由配置
+│   │   ├── stores/      # 状态管理
+│   │   ├── utils/       # 工具函数
+│   │   └── views/       # 页面组件
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
 ├── docker-compose.yml   # Docker Compose 配置
 ├── .env                 # 环境变量
 ├── .dockerignore        # Docker 构建忽略文件
@@ -76,6 +105,7 @@ whu-campus-auth/
 - Go 1.25+
 - MySQL 5.7+
 - Redis (可选)
+- Node.js 16+ (前端)
 - Docker & Docker Compose（推荐）
 
 ### 方式一：Docker 部署（推荐）
@@ -94,19 +124,19 @@ docker-compose logs -f
 
 **详细说明**：[DOCKER.md](DOCKER.md)
 
-### 方式二：本地运行
+### 方式二：本地运行后端
 
-### 安装依赖
+#### 安装依赖
 
 ```bash
 go mod tidy
 ```
 
-### 配置
+#### 配置
 
 编辑 `config.yaml` 文件，配置数据库和 Redis 连接信息。
 
-### 运行
+#### 运行
 
 ```bash
 cd cmd
@@ -114,6 +144,29 @@ go run main.go
 ```
 
 服务器默认启动在 `http://localhost:8888`
+
+### 方式三：本地运行前端
+
+#### 安装依赖
+
+```bash
+cd frontend
+npm install
+```
+
+#### 运行
+
+```bash
+npm run dev
+```
+
+前端服务默认启动在 `http://localhost:3000`
+
+#### 构建
+
+```bash
+npm run build
+```
 
 ## API 接口
 
@@ -123,11 +176,13 @@ go run main.go
 
 ### 用户接口
 - `GET /api/user/info` - 获取当前用户信息
+- `POST /api/user` - 创建用户
 - `PUT /api/user` - 更新用户信息
 - `PUT /api/user/password` - 修改密码
 - `GET /api/user/list` - 获取用户列表
 - `DELETE /api/user/:id` - 删除用户
 - `POST /api/user/assign-roles` - 分配角色
+- `POST /api/user/avatar` - 上传头像
 
 ### 角色接口
 - `GET /api/role/:id` - 获取角色详情
@@ -171,13 +226,27 @@ go run main.go
 
 ## 技术栈
 
+### 后端
 - **框架**: Gin
 - **ORM**: GORM
 - **认证**: JWT
 - **缓存**: Redis (可选)
 - **密码加密**: bcrypt
+- **日志**: Zap
+- **权限控制**: Casbin RBAC
+
+### 前端
+- **框架**: Vue 3
+- **构建工具**: Vite
+- **UI 组件库**: Element Plus
+- **状态管理**: Pinia
+- **路由**: Vue Router
+- **HTTP 客户端**: Axios
+
+### 运维
 - **反向代理**: Nginx
 - **容器化**: Docker & Docker Compose
+- **HTTPS**: Let's Encrypt
 
 ## 文档
 

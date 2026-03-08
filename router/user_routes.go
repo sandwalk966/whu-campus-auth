@@ -12,7 +12,8 @@ func RegisterUserRoutes(protected *gin.RouterGroup, userAPI *api.UserAPI, upload
 	user := protected.Group("/user")
 	{
 		user.GET("/info", userAPI.GetUserInfo)
-		user.PUT("", userAPI.UpdateUser)
+		user.POST("", middleware.IsAdmin(), userAPI.CreateUser)
+		user.PUT("", middleware.IsAdmin(), userAPI.UpdateUser)
 		user.PUT("/password", userAPI.ChangePassword)
 		user.GET("/list", userAPI.GetUserList)
 		user.DELETE("/:id", middleware.IsAdmin(), userAPI.DeleteUser)

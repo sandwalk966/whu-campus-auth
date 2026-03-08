@@ -53,6 +53,28 @@ func (s *UserService) Login(loginReq req.LoginRequest) (string, error) {
 	return token, nil
 }
 
+func (s *UserService) CreateUser(createReq req.CreateUserRequest) error {
+	_, err := s.userDAO.GetByUsername(createReq.Username)
+	if err == nil {
+		return errors.New("用户名已存在")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createReq.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user := &db.User{
+		Username: createReq.Username,
+		Password: string(hashedPassword),
+		Email:    createReq.Email,
+		Phone:    createReq.Phone,
+		Status:   createReq.Status,
+	}
+
+	return s.userDAO.Create(user)
+}
+
 func (s *UserService) Register(registerReq req.RegisterRequest) error {
 	_, err := s.userDAO.GetByUsername(registerReq.Username)
 	if err == nil {

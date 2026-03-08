@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import request from '@/utils/request'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
@@ -8,27 +8,33 @@ export const useUserStore = defineStore('user', () => {
 
   // 登录
   async function login(username, password) {
-    const response = await axios.post('/api/auth/login', {
+    const response = await request.post('/api/auth/login', {
       username,
       password
     })
     
-    if (response.data.code === 200) {
-      token.value = response.data.data.token
-      localStorage.setItem('token', response.data.data.token)
-      await getUserInfo()
+    if (response.code === 200) {
+      token.value = response.data.token
+      localStorage.setItem('token', response.data.token)
+      
+      // 获取用户信息（失败不影响登录）
+      try {
+        await getUserInfo()
+      } catch (error) {
+        console.error('获取用户信息失败，但不影响登录:', error)
+      }
     }
     
-    return response.data
+    return response
   }
 
   // 获取用户信息
   async function getUserInfo() {
-    const response = await axios.get('/api/user/info')
-    if (response.data.code === 200) {
-      userInfo.value = response.data.data
+    const response = await request.get('/api/user/info')
+    if (response.code === 200) {
+      userInfo.value = response.data
     }
-    return response.data
+    return response
   }
 
   // 登出

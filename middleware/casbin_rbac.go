@@ -11,6 +11,7 @@ func IsAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId, exists := c.Get("userId")
 		if !exists {
+			utils.LogWarn("IsAdmin 中间件：无法获取用户信息")
 			utils.Forbidden(c, "无法获取用户信息")
 			c.Abort()
 			return
@@ -19,6 +20,7 @@ func IsAdmin() gin.HandlerFunc {
 		db := GetDB()
 		var user dbModel.User
 		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
+			utils.LogErrorf("IsAdmin 中间件：查询用户失败：%v", err)
 			utils.ErrorWithMessage(c, "用户不存在")
 			c.Abort()
 			return
@@ -33,11 +35,13 @@ func IsAdmin() gin.HandlerFunc {
 		}
 
 		if !hasAdminRole {
+			utils.LogWarnf("IsAdmin 中间件：用户 %s 不是管理员", user.Username)
 			utils.Forbidden(c, "需要管理员权限")
 			c.Abort()
 			return
 		}
 
+		utils.LogInfof("IsAdmin 中间件：用户 %s 通过管理员验证", user.Username)
 		c.Next()
 	}
 }

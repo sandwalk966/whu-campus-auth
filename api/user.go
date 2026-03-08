@@ -39,6 +39,26 @@ func (api *UserAPI) Login(c *gin.Context) {
 	})
 }
 
+func (api *UserAPI) CreateUser(c *gin.Context) {
+	var createReq req.CreateUserRequest
+	if err := c.ShouldBindJSON(&createReq); err != nil {
+		utils.LogErrorf("创建用户 - 参数绑定失败：%v", err)
+		utils.ErrorWithMessage(c, err.Error())
+		return
+	}
+
+	utils.LogInfof("创建用户 - 请求参数：%+v", createReq)
+
+	if err := api.userService.CreateUser(createReq); err != nil {
+		utils.LogErrorf("创建用户失败：%v", err)
+		utils.ErrorWithMessage(c, err.Error())
+		return
+	}
+
+	utils.LogInfof("创建用户成功：%s", createReq.Username)
+	utils.SuccessWithMessage(c, "创建成功")
+}
+
 func (api *UserAPI) Register(c *gin.Context) {
 	var registerReq req.RegisterRequest
 	if err := c.ShouldBindJSON(&registerReq); err != nil {
@@ -97,18 +117,29 @@ func (api *UserAPI) ChangePassword(c *gin.Context) {
 }
 
 func (api *UserAPI) GetUserList(c *gin.Context) {
-	var listReq req.UserListRequest
-	if err := c.ShouldBindJSON(&listReq); err != nil {
-		utils.ErrorWithMessage(c, err.Error())
-		return
+	page := c.DefaultQuery("page", "1")
+	pageSize := c.DefaultQuery("page_size", "10")
+	username := c.Query("username")
+	status := c.Query("status")
+
+	utils.LogInfof("获取用户列表 - page: %s, page_size: %s, username: %s, status: %s",
+		page, pageSize, username, status)
+
+	var pageInt, pageSizeInt, statusInt int
+	fmt.Sscanf(page, "%d", &pageInt)
+	fmt.Sscanf(pageSize, "%d", &pageSizeInt)
+	if status != "" {
+		fmt.Sscanf(status, "%d", &statusInt)
 	}
 
-	users, total, err := api.userService.GetUserList(listReq.Page, listReq.PageSize, listReq.Username, listReq.Status)
+	users, total, err := api.userService.GetUserList(pageInt, pageSizeInt, username, statusInt)
 	if err != nil {
+		utils.LogErrorf("获取用户列表失败：%v", err)
 		utils.ErrorWithMessage(c, err.Error())
 		return
 	}
 
+	utils.LogInfof("获取用户列表成功 - total: %d", total)
 	utils.SuccessWithData(c, gin.H{
 		"list":  users,
 		"total": total,

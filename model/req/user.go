@@ -13,6 +13,14 @@ type RegisterRequest struct {
 	Phone    string `json:"phone"`
 }
 
+type CreateUserRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Status   int    `json:"status"`
+}
+
 type UpdateUserRequest struct {
 	ID       uint   `json:"id" binding:"required"`
 	Nickname string `json:"nickname"`
