@@ -43,7 +43,7 @@ func (s *DictService) CreateDict(createReq req.CreateDictRequest) error {
 func (s *DictService) UpdateDict(updateReq req.UpdateDictRequest) error {
 	dict, err := s.dictDAO.GetByID(updateReq.ID)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if updateReq.Name != "" {

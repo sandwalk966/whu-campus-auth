@@ -10,27 +10,38 @@
         text-color="#bfcbd9"
         active-text-color="#409EFF"
         router
+        :unique-opened="true"
       >
+        <!-- 首页菜单（始终显示） -->
         <el-menu-item index="/dashboard">
           <el-icon><HomeFilled /></el-icon>
-          <span>首页</span>
+          <span>Dashboard</span>
         </el-menu-item>
-        <el-menu-item index="/user">
-          <el-icon><User /></el-icon>
-          <span>用户管理</span>
-        </el-menu-item>
-        <el-menu-item index="/role">
-          <el-icon><UserFilled /></el-icon>
-          <span>角色管理</span>
-        </el-menu-item>
-        <el-menu-item index="/menu">
-          <el-icon><Menu /></el-icon>
-          <span>菜单管理</span>
-        </el-menu-item>
-        <el-menu-item index="/dict">
-          <el-icon><Collection /></el-icon>
-          <span>字典管理</span>
-        </el-menu-item>
+        
+        <!-- 动态菜单 -->
+        <template v-for="menu in userStore.userMenus" :key="menu.id">
+          <!-- 有子菜单 -->
+          <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="String(menu.id)">
+            <template #title>
+              <el-icon v-if="menu.icon"><component :is="menu.icon" /></el-icon>
+              <span>{{ menu.name }}</span>
+            </template>
+            <el-menu-item
+              v-for="child in menu.children"
+              :key="child.id"
+              :index="child.path"
+            >
+              <el-icon v-if="child.icon"><component :is="child.icon" /></el-icon>
+              <span>{{ child.name }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          
+          <!-- 无子菜单 -->
+          <el-menu-item v-else :index="menu.path">
+            <el-icon v-if="menu.icon"><component :is="menu.icon" /></el-icon>
+            <span>{{ menu.name }}</span>
+          </el-menu-item>
+        </template>
       </el-menu>
     </el-aside>
     
@@ -43,13 +54,13 @@
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-avatar :size="30" :icon="UserFilled" />
-              <span class="username">{{ userStore.userInfo?.nickname || userStore.userInfo?.username || '管理员' }}</span>
+              <span class="username">{{ userStore.userInfo?.nickname || userStore.userInfo?.username || 'Admin' }}</span>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="logout">
                   <el-icon><SwitchButton /></el-icon>
-                  退出登录
+                  Logout
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -75,13 +86,13 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
-const currentTitle = computed(() => route.meta.title || '首页')
+const currentTitle = computed(() => route.meta.title || 'Dashboard')
 
 const handleCommand = async (command) => {
   if (command === 'logout') {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm('Are you sure you want to logout?', 'Confirm', {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
       type: 'warning'
     })
     userStore.logout()

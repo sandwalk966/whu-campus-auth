@@ -3,32 +3,32 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>用户列表</span>
+          <span>User List</span>
           <el-button type="primary" @click="handleAdd">
             <el-icon><Plus /></el-icon>
-            新增用户
+            Add User
           </el-button>
         </div>
       </template>
       
-      <!-- 搜索栏 -->
+      <!-- Search Bar -->
       <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="用户名">
-          <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable />
+        <el-form-item label="Username">
+          <el-input v-model="searchForm.username" placeholder="Enter username" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">
             <el-icon><Search /></el-icon>
-            搜索
+            Search
           </el-button>
           <el-button @click="handleReset">
             <el-icon><Refresh /></el-icon>
-            重置
+            Reset
           </el-button>
         </el-form-item>
       </el-form>
       
-      <!-- 表格 -->
+      <!-- Table -->
       <el-table
         v-loading="loading"
         :data="tableData"
@@ -37,30 +37,30 @@
         style="width: 100%"
       >
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="phone" label="手机号" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="username" label="Username" />
+        <el-table-column prop="email" label="Email" />
+        <el-table-column prop="phone" label="Phone" />
+        <el-table-column prop="status" label="Status" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'">
-              {{ row.status === 1 ? '正常' : '禁用' }}
+              {{ row.status === 1 ? 'Active' : 'Disabled' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column prop="created_at" label="Created At" />
+        <el-table-column label="Actions" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="handleEdit(row)">
-              编辑
+              Edit
             </el-button>
             <el-button type="danger" size="small" @click="handleDelete(row)">
-              删除
+              Delete
             </el-button>
           </template>
         </el-table-column>
       </el-table>
       
-      <!-- 分页 -->
+      <!-- Pagination -->
       <el-pagination
         v-model:current-page="pagination.page"
         v-model:page-size="pagination.pageSize"
@@ -73,7 +73,7 @@
       />
     </el-card>
     
-    <!-- 新增/编辑对话框 -->
+    <!-- Add/Edit Dialog -->
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
@@ -85,30 +85,30 @@
         :rules="formRules"
         label-width="80px"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="formData.username" placeholder="请输入用户名" />
+        <el-form-item label="Username" prop="username">
+          <el-input v-model="formData.username" placeholder="Enter username" />
         </el-form-item>
-        <el-form-item label="密码" prop="password" v-if="!formData.id">
-          <el-input v-model="formData.password" type="password" placeholder="请输入密码" />
+        <el-form-item label="Password" prop="password" v-if="!formData.id">
+          <el-input v-model="formData.password" type="password" placeholder="Enter password" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.email" placeholder="请输入邮箱" />
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="formData.email" placeholder="Enter email" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="formData.phone" placeholder="请输入手机号" />
+        <el-form-item label="Phone" prop="phone">
+          <el-input v-model="formData.phone" placeholder="Enter phone number" />
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item label="Status">
           <el-radio-group v-model="formData.status">
-            <el-radio :label="1">正常</el-radio>
-            <el-radio :label="0">禁用</el-radio>
+            <el-radio :label="1">Active</el-radio>
+            <el-radio :label="0">Disabled</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="handleSubmit" :loading="submitLoading">
-          确定
+          Confirm
         </el-button>
       </template>
     </el-dialog>
@@ -123,7 +123,7 @@ import { getUserList, createUser, updateUser, deleteUser } from '@/api'
 const loading = ref(false)
 const submitLoading = ref(false)
 const dialogVisible = ref(false)
-const dialogTitle = ref('新增用户')
+const dialogTitle = ref('Add User')
 const formRef = ref()
 
 const searchForm = reactive({
@@ -148,14 +148,27 @@ const formData = reactive({
 })
 
 const formRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  username: [
+    { required: true, message: 'Please enter username', trigger: 'blur' },
+    { min: 3, max: 50, message: 'Username must be between 3 and 50 characters', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Please enter password', trigger: 'blur' },
+    { min: 6, max: 50, message: 'Password must be between 6 and 50 characters', trigger: 'blur' }
+  ],
   email: [
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { type: 'email', message: 'Please enter a valid email format', trigger: 'blur' }
+  ],
+  phone: [
+    { 
+      pattern: /^1[3-9]\d{9}$/, 
+      message: 'Invalid phone format, please enter 11-digit Mainland China phone number (starts with 1, second digit is 3-9)', 
+      trigger: 'blur' 
+    }
   ]
 }
 
-// 加载数据
+// Load data
 const loadData = async () => {
   loading.value = true
   try {
@@ -169,87 +182,104 @@ const loadData = async () => {
       pagination.total = res.data.total || 0
     }
   } catch (error) {
-    console.error('加载用户列表失败:', error)
-    ElMessage.error('加载失败：' + (error.message || '未知错误'))
+    console.error('Failed to load user list:', error)
+    ElMessage.error('Load failed: ' + (error.message || 'Unknown error'))
   } finally {
     loading.value = false
   }
 }
 
-// 搜索
+// Search
 const handleSearch = () => {
   pagination.page = 1
   loadData()
 }
 
-// 重置
+// Reset
 const handleReset = () => {
   searchForm.username = ''
   handleSearch()
 }
 
-// 新增
+// Add
 const handleAdd = () => {
-  dialogTitle.value = '新增用户'
+  dialogTitle.value = 'Add User'
   resetForm()
   dialogVisible.value = true
 }
 
-// 编辑
+// Edit
 const handleEdit = (row) => {
-  dialogTitle.value = '编辑用户'
+  dialogTitle.value = 'Edit User'
   Object.assign(formData, row)
   dialogVisible.value = true
 }
 
-// 删除
-const handleDelete = (row) => {
-  ElMessageBox.confirm('确定要删除该用户吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    try {
-      await deleteUser(row.id)
-      ElMessage.success('删除成功')
-      loadData()
-    } catch (error) {
-      console.error(error)
+// Delete
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm('Are you sure you want to delete this user?', 'Warning', {
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      type: 'warning'
+    })
+    
+    await deleteUser(row.id)
+    ElMessage.success('Deleted successfully')
+    
+    // If current page data is empty and not the first page, navigate to previous page
+    if (tableData.value.length === 1 && pagination.page > 1) {
+      pagination.page--
     }
-  })
+    loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Delete failed:', error)
+      ElMessage.error('Delete failed: ' + (error.message || 'Unknown error'))
+    }
+  }
 }
 
-// 提交
+// Submit
 const handleSubmit = async () => {
-  formRef.value.validate(async (valid) => {
-    if (!valid) return
+  if (!formRef.value) return
+  
+  await formRef.value.validate(async (valid) => {
+    if (!valid) {
+      ElMessage.warning('Please check if the form is filled correctly')
+      return
+    }
     
     submitLoading.value = true
     try {
       if (formData.id) {
-        // 更新用户
+        // Update user
         await updateUser(formData)
-        ElMessage.success('更新成功')
+        ElMessage.success('Updated successfully')
       } else {
-        // 创建用户
+        // Create user
         await createUser(formData)
-        ElMessage.success('创建成功')
+        ElMessage.success('Created successfully')
       }
       dialogVisible.value = false
+      // When adding a user, if on first page, refresh current page; otherwise keep current page
       loadData()
     } catch (error) {
-      console.error('提交失败:', error)
+      console.error('Submit failed:', error)
+      // Display error message from backend
+      const errorMsg = error.response?.data?.message || error.message || 'Operation failed'
+      ElMessage.error(errorMsg)
     } finally {
       submitLoading.value = false
     }
   })
 }
 
-// 分页变化
+// Pagination change
 const handleSizeChange = () => loadData()
 const handlePageChange = () => loadData()
 
-// 重置表单
+// Reset form
 const resetForm = () => {
   Object.assign(formData, {
     id: null,

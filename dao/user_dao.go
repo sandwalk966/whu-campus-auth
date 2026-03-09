@@ -71,7 +71,7 @@ func (dao *UserDAO) GetList(page, pageSize int, username string, status int) ([]
 }
 
 func (dao *UserDAO) PreloadRoles(user *db.User) error {
-	return dao.db.Preload("Roles").First(user, user.ID).Error
+	return dao.db.Preload("Roles.Menus").First(user, user.ID).Error
 }
 
 func (dao *UserDAO) AssignRoles(userID uint, roleIDs []uint) error {

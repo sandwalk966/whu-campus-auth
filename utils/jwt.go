@@ -2,9 +2,11 @@ package utils
 
 import (
 	"errors"
+	"strings"
 	"time"
 	"whu-campus-auth/config"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -77,4 +79,16 @@ func (j *JWT) ParseToken(tokenString string) (*Claims, error) {
 
 func (j *JWT) CreateTokenByOldToken(oldToken string, claims Claims) (string, error) {
 	return j.CreateToken(claims)
+}
+
+// GetTokenFromRequest 从请求中提取 token
+func GetTokenFromRequest(c *gin.Context) string {
+	token := c.GetHeader("x-token")
+	if token == "" {
+		token = c.GetHeader("Authorization")
+		if len(token) > 7 && strings.HasPrefix(token, "Bearer ") {
+			token = token[7:]
+		}
+	}
+	return token
 }

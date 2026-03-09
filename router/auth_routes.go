@@ -6,7 +6,8 @@ import (
 )
 
 // RegisterAuthRoutes 注册认证路由
-func RegisterAuthRoutes(r *gin.Engine, userAPI *api.UserAPI) {
+func RegisterAuthRoutes(r *gin.Engine, userAPI *api.UserAPI, authAPI *api.AuthAPI) {
 	r.POST("/api/auth/login", userAPI.Login)
 	r.POST("/api/auth/register", userAPI.Register)
+	r.POST("/api/auth/logout", authAPI.Logout)
 }

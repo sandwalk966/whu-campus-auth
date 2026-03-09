@@ -3,13 +3,13 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
-// 创建 axios 实例
+// Create axios instance
 const request = axios.create({
   baseURL: '',
   timeout: 10000
 })
 
-// 请求拦截器
+// Request interceptor
 request.interceptors.request.use(
   config => {
     const userStore = useUserStore()
@@ -23,29 +23,29 @@ request.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// Response interceptor
 request.interceptors.response.use(
   response => {
     const res = response.data
     
-    // 如果响应码不是 0 或 200，显示错误消息
+    // If response code is not 0 or 200, show error message
     if (res.code !== 0 && res.code !== 200) {
-      ElMessage.error(res.message || res.msg || '请求失败')
+      ElMessage.error(res.message || res.msg || 'Request failed')
       
-      // Token 过期或无效，跳转登录页
+      // Token expired or invalid, redirect to login
       if (res.code === 401) {
         const userStore = useUserStore()
         userStore.logout()
         router.push('/login')
       }
       
-      return Promise.reject(new Error(res.message || res.msg || '请求失败'))
+      return Promise.reject(new Error(res.message || res.msg || 'Request failed'))
     }
     
     return res
   },
   error => {
-    ElMessage.error(error.message || '网络错误')
+    ElMessage.error(error.message || 'Network error')
     return Promise.reject(error)
   }
 )

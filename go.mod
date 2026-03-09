@@ -13,6 +13,8 @@ require (
 	gorm.io/gorm v1.31.1
 )
 
+require github.com/go-redis/redis/v8 v8.11.5 // indirect
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect

@@ -18,7 +18,7 @@ func NewRoleService(roleDAO dao.IRoleDAO) *RoleService {
 func (s *RoleService) CreateRole(createReq req.CreateRoleRequest) error {
 	_, err := s.roleDAO.GetByCode(createReq.Code)
 	if err == nil {
-		return errors.New("角色编码已存在")
+		return errors.New("Role code already exists")
 	}
 
 	role := &db.Role{
@@ -42,7 +42,7 @@ func (s *RoleService) CreateRole(createReq req.CreateRoleRequest) error {
 func (s *RoleService) UpdateRole(updateReq req.UpdateRoleRequest) error {
 	role, err := s.roleDAO.GetByID(updateReq.ID)
 	if err != nil {
-		return errors.New("角色不存在")
+		return errors.New("Role does not exist")
 	}
 
 	if updateReq.Name != "" {

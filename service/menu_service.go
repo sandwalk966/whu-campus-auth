@@ -32,7 +32,7 @@ func (s *MenuService) CreateMenu(createReq req.CreateMenuRequest) error {
 func (s *MenuService) UpdateMenu(updateReq req.UpdateMenuRequest) error {
 	menu, err := s.menuDAO.GetByID(updateReq.ID)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if updateReq.Name != "" {

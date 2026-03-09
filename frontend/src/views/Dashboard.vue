@@ -1,5 +1,12 @@
 <template>
   <div class="dashboard">
+    <div class="dashboard-header">
+      <h2>Statistics</h2>
+      <el-button type="primary" @click="loadStats" :loading="loading">
+        <el-icon><Refresh /></el-icon>
+        Refresh
+      </el-button>
+    </div>
     <el-row :gutter="20">
       <el-col :span="6">
         <el-card class="stat-card">
@@ -8,8 +15,8 @@
               <el-icon :size="40"><User /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">128</div>
-              <div class="stat-label">用户总数</div>
+              <div class="stat-value">{{ stats.userCount }}</div>
+              <div class="stat-label">Total Users</div>
             </div>
           </div>
         </el-card>
@@ -22,8 +29,8 @@
               <el-icon :size="40"><UserFilled /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">5</div>
-              <div class="stat-label">角色数量</div>
+              <div class="stat-value">{{ stats.roleCount }}</div>
+              <div class="stat-label">Total Roles</div>
             </div>
           </div>
         </el-card>
@@ -36,8 +43,8 @@
               <el-icon :size="40"><Menu /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">20</div>
-              <div class="stat-label">菜单数量</div>
+              <div class="stat-value">{{ stats.menuCount }}</div>
+              <div class="stat-label">Total Menus</div>
             </div>
           </div>
         </el-card>
@@ -50,8 +57,8 @@
               <el-icon :size="40"><Collection /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">10</div>
-              <div class="stat-label">字典数量</div>
+              <div class="stat-value">{{ stats.dictCount }}</div>
+              <div class="stat-label">Total Dicts</div>
             </div>
           </div>
         </el-card>
@@ -61,28 +68,28 @@
     <el-card class="welcome-card" style="margin-top: 20px;">
       <template #header>
         <div class="card-header">
-          <span>欢迎使用 WHU Campus Auth</span>
+          <span>Welcome to WHU Campus Auth</span>
         </div>
       </template>
       <div class="welcome-content">
-        <h3>武汉大学校园权限管理系统</h3>
-        <p>这是一个基于 Gin + Vue 的权限管理系统，提供用户管理、角色管理、菜单管理和字典管理等功能。</p>
+        <h3>Wuhan University Campus Permission Management System</h3>
+        <p>A permission management system based on Gin + Vue, providing user management, role management, menu management, and dictionary management.</p>
         
-        <h4>主要功能：</h4>
+        <h4>Main Features:</h4>
         <ul>
-          <li>✅ 用户认证（JWT）</li>
-          <li>✅ 角色权限管理</li>
-          <li>✅ 动态菜单配置</li>
-          <li>✅ 数据字典管理</li>
-          <li>✅ 文件上传下载</li>
+          <li>✅ User Authentication (JWT)</li>
+          <li>✅ Role Permission Management</li>
+          <li>✅ Dynamic Menu Configuration</li>
+          <li>✅ Data Dictionary Management</li>
+          <li>✅ File Upload & Download</li>
         </ul>
         
-        <h4>技术栈：</h4>
+        <h4>Technology Stack:</h4>
         <ul>
-          <li><strong>后端：</strong>Go + Gin + GORM</li>
-          <li><strong>前端：</strong>Vue 3 + Element Plus</li>
-          <li><strong>数据库：</strong>MySQL</li>
-          <li><strong>缓存：</strong>Redis</li>
+          <li><strong>Backend:</strong> Go + Gin + GORM</li>
+          <li><strong>Frontend:</strong> Vue 3 + Element Plus</li>
+          <li><strong>Database:</strong> MySQL</li>
+          <li><strong>Cache:</strong> Redis</li>
         </ul>
       </div>
     </el-card>
@@ -90,11 +97,83 @@
 </template>
 
 <script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { Refresh } from '@element-plus/icons-vue'
+import { getUserList, getRoleList, getMenuTree, getDictList } from '@/api'
+
+const loading = ref(false)
+
+const stats = reactive({
+  userCount: 0,
+  roleCount: 0,
+  menuCount: 0,
+  dictCount: 0
+})
+
+// 加载统计数据
+const loadStats = async () => {
+  loading.value = true
+  try {
+    // Get total user count
+    const userRes = await getUserList({ page: 1, page_size: 1 })
+    if (userRes && userRes.data) {
+      stats.userCount = userRes.data.total || 0
+    }
+    
+    // Get total role count
+    const roleRes = await getRoleList({ page: 1, page_size: 1 })
+    if (roleRes && roleRes.data) {
+      stats.roleCount = roleRes.data.total || 0
+    }
+    
+    // Get total menu count
+    const menuRes = await getMenuTree()
+    if (menuRes && menuRes.data) {
+      const countMenus = (menus) => {
+        let count = 0
+        for (const menu of menus) {
+          count++
+          if (menu.children && menu.children.length > 0) {
+            count += countMenus(menu.children)
+          }
+        }
+        return count
+      }
+      stats.menuCount = countMenus(menuRes.data)
+    }
+    
+    // Get total dict count
+    const dictRes = await getDictList({ page: 1, page_size: 1 })
+    if (dictRes && dictRes.data) {
+      stats.dictCount = dictRes.data.total || 0
+    }
+  } catch (error) {
+    console.error('Failed to load statistics:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadStats()
+})
 </script>
 
 <style scoped>
 .dashboard {
   padding: 20px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  color: #333;
 }
 
 .stat-card {

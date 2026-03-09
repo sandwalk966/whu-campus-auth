@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"whu-campus-auth/config"
+	"whu-campus-auth/service"
 	"whu-campus-auth/utils"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 )
 
@@ -24,6 +25,9 @@ func InitRedis(cfg *config.RedisConfig) error {
 	if err != nil {
 		return fmt.Errorf("redis connection failed: %v", err)
 	}
+	
+	// 设置全局 Redis 客户端供 service 包使用
+	service.SetRedisClient(RedisClient)
 	
 	utils.LogInfo("Redis 连接成功")
 	return nil

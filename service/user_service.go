@@ -13,25 +13,38 @@ import (
 )
 
 type UserService struct {
-	userDAO dao.IUserDAO
+	userDAO      dao.IUserDAO
+	redisService *RedisService
 }
 
-func NewUserService(userDAO dao.IUserDAO) *UserService {
-	return &UserService{userDAO: userDAO}
+func NewUserService(userDAO dao.IUserDAO, redisService *RedisService) *UserService {
+	return &UserService{
+		userDAO:      userDAO,
+		redisService: redisService,
+	}
 }
 
-func (s *UserService) Login(loginReq req.LoginRequest) (string, error) {
+func (s *UserService) Login(loginReq req.LoginRequest) (string, *db.User, error) {
 	user, err := s.userDAO.GetByUsername(loginReq.Username)
 	if err != nil {
-		return "", errors.New("用户名或密码错误")
+		return "", nil, errors.New("Invalid username or password")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginReq.Password)); err != nil {
-		return "", errors.New("用户名或密码错误")
+		return "", nil, errors.New("Invalid username or password")
 	}
 
 	if user.Status != 1 {
-		return "", errors.New("账号已被禁用")
+		return "", nil, errors.New("Account has been disabled")
+	}
+
+	// 检查用户是否被禁用（Redis 标记）
+	isDisabled, err := s.redisService.IsUserDisabled(user.ID)
+	if err != nil {
+		utils.LogErrorf("检查用户状态失败：%v", err)
+	}
+	if isDisabled {
+		return "", nil, errors.New("User has been disabled or deleted")
 	}
 
 	j := utils.NewJWT()
@@ -47,16 +60,16 @@ func (s *UserService) Login(loginReq req.LoginRequest) (string, error) {
 
 	token, err := j.CreateToken(claims)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return token, nil
+	return token, user, nil
 }
 
 func (s *UserService) CreateUser(createReq req.CreateUserRequest) error {
 	_, err := s.userDAO.GetByUsername(createReq.Username)
 	if err == nil {
-		return errors.New("用户名已存在")
+		return errors.New("Username already exists")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createReq.Password), bcrypt.DefaultCost)
@@ -72,13 +85,20 @@ func (s *UserService) CreateUser(createReq req.CreateUserRequest) error {
 		Status:   createReq.Status,
 	}
 
-	return s.userDAO.Create(user)
+	if err := s.userDAO.Create(user); err != nil {
+		return err
+	}
+
+	// 清除用户名缓存（防止缓存穿透）
+	s.redisService.DeleteUserCacheByUsername(user.Username)
+
+	return nil
 }
 
 func (s *UserService) Register(registerReq req.RegisterRequest) error {
 	_, err := s.userDAO.GetByUsername(registerReq.Username)
 	if err == nil {
-		return errors.New("用户名已存在")
+		return errors.New("Username already exists")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerReq.Password), bcrypt.DefaultCost)
@@ -95,11 +115,26 @@ func (s *UserService) Register(registerReq req.RegisterRequest) error {
 		Status:   1,
 	}
 
-	return s.userDAO.Create(user)
+	if err := s.userDAO.Create(user); err != nil {
+		return err
+	}
+
+	// 清除用户名缓存
+	s.redisService.DeleteUserCacheByUsername(user.Username)
+
+	return nil
 }
 
 func (s *UserService) GetUserByID(id uint) (*db.User, error) {
-	user, err := s.userDAO.GetByID(id)
+	// 先从缓存中读取
+	cacheKey := s.redisService.GetUserCacheKey(id)
+	user, err := s.redisService.GetUserFromCache(id)
+	if err == nil && user != nil {
+		return user, nil
+	}
+
+	// 缓存未命中，从数据库读取
+	user, err = s.userDAO.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -108,6 +143,29 @@ func (s *UserService) GetUserByID(id uint) (*db.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// 写入缓存
+	s.redisService.SetUserCache(user, cacheKey)
+
+	return user, nil
+}
+
+// GetUserByIDWithCache 带缓存的用户查询（推荐方法）
+func (s *UserService) GetUserByIDWithCache(id uint) (*db.User, error) {
+	// 1. 先尝试从缓存获取
+	cachedUser, err := s.redisService.GetCachedUserInfo(id)
+	if err == nil && cachedUser != nil {
+		return cachedUser, nil
+	}
+
+	// 2. 缓存未命中，从数据库获取
+	user, err := s.GetUserByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. 存入缓存（5 分钟）
+	s.redisService.CacheUserInfo(id, user, 5*time.Minute)
 
 	return user, nil
 }
@@ -125,17 +183,26 @@ func (s *UserService) UpdateUser(updateReq req.UpdateUserRequest) error {
 	user.Gender = updateReq.Gender
 	user.Status = updateReq.Status
 
-	return s.userDAO.Update(user)
+	// 更新数据库
+	if err := s.userDAO.Update(user); err != nil {
+		return err
+	}
+
+	// 清除缓存
+	s.redisService.DeleteUserCache(user.ID)
+	s.redisService.DeleteUserCacheByUsername(user.Username)
+
+	return nil
 }
 
 func (s *UserService) ChangePassword(userID uint, changeReq req.ChangePasswordRequest) error {
 	user, err := s.userDAO.GetByID(userID)
 	if err != nil {
-		return errors.New("用户不存在")
+		return errors.New("User does not exist")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(changeReq.OldPassword)); err != nil {
-		return errors.New("原密码错误")
+		return errors.New("Old password is incorrect")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(changeReq.NewPassword), bcrypt.DefaultCost)
@@ -144,7 +211,17 @@ func (s *UserService) ChangePassword(userID uint, changeReq req.ChangePasswordRe
 	}
 
 	user.Password = string(hashedPassword)
-	return s.userDAO.Update(user)
+
+	// 更新数据库
+	if err := s.userDAO.Update(user); err != nil {
+		return err
+	}
+
+	// 清除缓存（密码修改后需要清除）
+	s.redisService.DeleteUserCache(user.ID)
+	s.redisService.DeleteUserCacheByUsername(user.Username)
+
+	return nil
 }
 
 func (s *UserService) GetUserList(page, pageSize int, username string, status int) ([]db.User, int64, error) {
@@ -152,7 +229,22 @@ func (s *UserService) GetUserList(page, pageSize int, username string, status in
 }
 
 func (s *UserService) DeleteUser(id uint) error {
-	return s.userDAO.Delete(id)
+	// 先获取用户信息
+	user, err := s.userDAO.GetByID(id)
+	if err != nil {
+		return errors.New("User does not exist")
+	}
+
+	// 删除用户（软删除）
+	if err := s.userDAO.Delete(id); err != nil {
+		return err
+	}
+
+	// 清除用户缓存（包括用户名缓存）
+	s.redisService.DeleteUserCache(id)
+	s.redisService.DeleteUserCacheByUsername(user.Username)
+
+	return nil
 }
 
 func (s *UserService) AssignRoles(userID uint, roleIDs []uint) error {
@@ -162,9 +254,19 @@ func (s *UserService) AssignRoles(userID uint, roleIDs []uint) error {
 func (s *UserService) UpdateAvatar(userID uint, avatarURL string) error {
 	user, err := s.userDAO.GetByID(userID)
 	if err != nil {
-		return errors.New("用户不存在")
+		return errors.New("User does not exist")
 	}
 
 	user.Avatar = avatarURL
-	return s.userDAO.Update(user)
+
+	// 更新数据库
+	if err := s.userDAO.Update(user); err != nil {
+		return err
+	}
+
+	// 清除缓存
+	s.redisService.DeleteUserCache(user.ID)
+	s.redisService.DeleteUserCacheByUsername(user.Username)
+
+	return nil
 }

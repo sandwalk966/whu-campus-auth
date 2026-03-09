@@ -3,60 +3,238 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>字典列表</span>
+          <span>Dictionary List</span>
           <el-button type="primary" @click="handleAdd">
             <el-icon><Plus /></el-icon>
-            新增字典
+            Add Dictionary
           </el-button>
         </div>
       </template>
       
-      <el-table :data="tableData" border stripe>
+      <!-- Table -->
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        stripe
+      >
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="字典名称" />
-        <el-table-column prop="code" label="字典编码" />
-        <el-table-column prop="desc" label="描述" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="name" label="Dictionary Name" />
+        <el-table-column prop="code" label="Dictionary Code" />
+        <el-table-column prop="desc" label="Description" />
+        <el-table-column prop="status" label="Status" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'">
-              {{ row.status === 1 ? '正常' : '禁用' }}
+              {{ row.status === 1 ? 'Active' : 'Disabled' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="Actions" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="handleEdit(row)">
-              编辑
+              Edit
             </el-button>
             <el-button type="danger" size="small" @click="handleDelete(row)">
-              删除
+              Delete
             </el-button>
           </template>
         </el-table-column>
       </el-table>
+      
+      <!-- Pagination -->
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.pageSize"
+        :total="pagination.total"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handlePageChange"
+        style="margin-top: 20px; justify-content: flex-end;"
+      />
     </el-card>
+    
+    <!-- Add/Edit Dialog -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="500px"
+    >
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="80px"
+      >
+        <el-form-item label="Dictionary Name" prop="name">
+          <el-input v-model="formData.name" placeholder="Enter dictionary name" />
+        </el-form-item>
+        <el-form-item label="Dictionary Code" prop="code">
+          <el-input v-model="formData.code" placeholder="Enter dictionary code (e.g., gender)" />
+        </el-form-item>
+        <el-form-item label="Description" prop="desc">
+          <el-input
+            v-model="formData.desc"
+            type="textarea"
+            :rows="3"
+            placeholder="Enter description"
+          />
+        </el-form-item>
+        <el-form-item label="Status">
+          <el-radio-group v-model="formData.status">
+            <el-radio :label="1">Active</el-radio>
+            <el-radio :label="0">Disabled</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">
+          Confirm
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getDictList, createDict, updateDict, deleteDict } from '@/api'
 
-const tableData = ref([
-  { id: 1, name: '性别字典', code: 'gender', desc: '性别字典', status: 1 },
-  { id: 2, name: '用户状态', code: 'user_status', desc: '用户状态字典', status: 1 }
-])
+const loading = ref(false)
+const submitLoading = ref(false)
+const dialogVisible = ref(false)
+const dialogTitle = ref('Add Dictionary')
+const formRef = ref()
 
+const tableData = ref([])
+
+const pagination = reactive({
+  page: 1,
+  pageSize: 10,
+  total: 0
+})
+
+const formData = reactive({
+  id: null,
+  name: '',
+  code: '',
+  desc: '',
+  status: 1
+})
+
+const formRules = {
+  name: [{ required: true, message: 'Please enter dictionary name', trigger: 'blur' }],
+  code: [{ required: true, message: 'Please enter dictionary code', trigger: 'blur' }]
+}
+
+// Load data
+const loadData = async () => {
+  loading.value = true
+  try {
+    const res = await getDictList({
+      page: pagination.page,
+      page_size: pagination.pageSize
+    })
+    if (res && res.data) {
+      tableData.value = res.data.list || []
+      pagination.total = res.data.total || 0
+    }
+  } catch (error) {
+    console.error('Failed to load dictionary list:', error)
+    ElMessage.error('Load failed: ' + (error.message || 'Unknown error'))
+  } finally {
+    loading.value = false
+  }
+}
+
+// Add
 const handleAdd = () => {
-  console.log('添加字典')
+  dialogTitle.value = 'Add Dictionary'
+  resetForm()
+  dialogVisible.value = true
 }
 
+// Edit
 const handleEdit = (row) => {
-  console.log('编辑字典', row)
+  dialogTitle.value = 'Edit Dictionary'
+  Object.assign(formData, row)
+  dialogVisible.value = true
 }
 
-const handleDelete = (row) => {
-  console.log('删除字典', row)
+// Delete
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm('Are you sure you want to delete this dictionary?', 'Warning', {
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      type: 'warning'
+    })
+    await deleteDict(row.id)
+    ElMessage.success('Deleted successfully')
+    loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Delete failed:', error)
+      ElMessage.error('Delete failed: ' + (error.message || 'Unknown error'))
+    }
+  }
 }
+
+// Submit
+const handleSubmit = async () => {
+  if (!formRef.value) return
+  
+  await formRef.value.validate(async (valid) => {
+    if (!valid) {
+      ElMessage.warning('Please check if the form is filled correctly')
+      return
+    }
+    
+    submitLoading.value = true
+    try {
+      if (formData.id) {
+        // Update dictionary
+        await updateDict(formData)
+        ElMessage.success('Updated successfully')
+      } else {
+        // Create dictionary
+        await createDict(formData)
+        ElMessage.success('Created successfully')
+      }
+      dialogVisible.value = false
+      loadData()
+    } catch (error) {
+      console.error('Submit failed:', error)
+      const errorMsg = error.response?.data?.message || error.message || 'Operation failed'
+      ElMessage.error(errorMsg)
+    } finally {
+      submitLoading.value = false
+    }
+  })
+}
+
+// Pagination change
+const handleSizeChange = () => loadData()
+const handlePageChange = () => loadData()
+
+// Reset form
+const resetForm = () => {
+  Object.assign(formData, {
+    id: null,
+    name: '',
+    code: '',
+    desc: '',
+    status: 1
+  })
+  formRef.value?.clearValidate()
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>

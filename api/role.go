@@ -1,9 +1,11 @@
 package api
 
 import (
+	"strconv"
 	"whu-campus-auth/model/req"
 	"whu-campus-auth/service"
 	"whu-campus-auth/utils"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +29,7 @@ func (api *RoleAPI) CreateRole(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessWithMessage(c, "创建成功")
+	utils.SuccessWithMessage(c, "Created successfully")
 }
 
 func (api *RoleAPI) UpdateRole(c *gin.Context) {
@@ -42,14 +44,25 @@ func (api *RoleAPI) UpdateRole(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessWithMessage(c, "更新成功")
+	utils.SuccessWithMessage(c, "Updated successfully")
 }
 
 func (api *RoleAPI) GetRoleByID(c *gin.Context) {
-	id := c.Param("id")
-	role, err := api.roleService.GetRoleByID(getIDFromParam(id))
+	idStr := c.Param("id")
+	if idStr == "" {
+		utils.ErrorWithMessage(c, "Role ID cannot be empty")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		utils.ErrorWithMessage(c, "Role ID must be a positive integer")
+		return
+	}
+
+	role, err := api.roleService.GetRoleByID(uint(id))
 	if err != nil {
-		utils.ErrorWithMessage(c, "角色不存在")
+		utils.ErrorWithMessage(c, "Role not found")
 		return
 	}
 
@@ -57,13 +70,35 @@ func (api *RoleAPI) GetRoleByID(c *gin.Context) {
 }
 
 func (api *RoleAPI) GetRoleList(c *gin.Context) {
-	var listReq req.RoleListRequest
-	if err := c.ShouldBindJSON(&listReq); err != nil {
-		utils.ErrorWithMessage(c, err.Error())
+	// 从查询参数中读取数据
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("page_size", "10")
+	name := c.Query("name")
+	statusStr := c.Query("status")
+
+	// 参数转换和校验
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		utils.ErrorWithMessage(c, "Page number must be a positive integer")
 		return
 	}
 
-	roles, total, err := api.roleService.GetRoleList(listReq.Page, listReq.PageSize, listReq.Name, listReq.Status)
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 || pageSize > 100 {
+		utils.ErrorWithMessage(c, "Page size must be between 1 and 100")
+		return
+	}
+
+	var status int
+	if statusStr != "" {
+		status, err = strconv.Atoi(statusStr)
+		if err != nil || (status != 0 && status != 1) {
+			utils.ErrorWithMessage(c, "Role status must be 0 or 1")
+			return
+		}
+	}
+
+	roles, total, err := api.roleService.GetRoleList(page, pageSize, name, status)
 	if err != nil {
 		utils.ErrorWithMessage(c, err.Error())
 		return
@@ -76,13 +111,24 @@ func (api *RoleAPI) GetRoleList(c *gin.Context) {
 }
 
 func (api *RoleAPI) DeleteRole(c *gin.Context) {
-	id := c.Param("id")
-	if err := api.roleService.DeleteRole(getIDFromParam(id)); err != nil {
+	idStr := c.Param("id")
+	if idStr == "" {
+		utils.ErrorWithMessage(c, "Role ID cannot be empty")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		utils.ErrorWithMessage(c, "Role ID must be a positive integer")
+		return
+	}
+
+	if err := api.roleService.DeleteRole(uint(id)); err != nil {
 		utils.ErrorWithMessage(c, err.Error())
 		return
 	}
 
-	utils.SuccessWithMessage(c, "删除成功")
+	utils.SuccessWithMessage(c, "Deleted successfully")
 }
 
 func (api *RoleAPI) GetAllRoles(c *gin.Context) {

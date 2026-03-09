@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"whu-campus-auth/config"
 	"whu-campus-auth/initializer"
 	"whu-campus-auth/middleware"
@@ -16,16 +15,6 @@ func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		// .env 文件不存在也没关系，使用默认配置
 		fmt.Println("未找到 .env 文件，使用默认配置")
-	}
-
-	// 从环境变量中读取配置，覆盖 config.yaml 的配置
-	// 优先级：环境变量 > config.yaml
-	if port := os.Getenv("SERVER_PORT"); port != "" {
-		os.Setenv("SERVER_PORT", port)
-	}
-
-	if ginMode := os.Getenv("GIN_MODE"); ginMode != "" {
-		os.Setenv("GIN_MODE", ginMode)
 	}
 
 	// 加载配置文件
@@ -47,8 +36,11 @@ func main() {
 	db := initializer.InitDatabase(cfg)
 	initializer.AutoMigrate(db)
 
-	// 初始化默认管理员账户（先于字典初始化）
+	// 初始化默认管理员账户（先于字典和菜单初始化）
 	initializer.InitAdminUser(db)
+	
+	// 初始化默认菜单
+	initializer.InitMenus(db)
 
 	// 初始化全局数据库连接（供 middleware 使用）
 	middleware.InitDB(db)

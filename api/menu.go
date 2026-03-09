@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strconv"
 	"whu-campus-auth/model/req"
 	"whu-campus-auth/service"
 	"whu-campus-auth/utils"
@@ -27,7 +28,7 @@ func (api *MenuAPI) CreateMenu(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessWithMessage(c, "创建成功")
+	utils.SuccessWithMessage(c, "Created successfully")
 }
 
 func (api *MenuAPI) UpdateMenu(c *gin.Context) {
@@ -42,14 +43,25 @@ func (api *MenuAPI) UpdateMenu(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessWithMessage(c, "更新成功")
+	utils.SuccessWithMessage(c, "Updated successfully")
 }
 
 func (api *MenuAPI) GetMenuByID(c *gin.Context) {
-	id := c.Param("id")
-	menu, err := api.menuService.GetMenuByID(getIDFromParam(id))
+	idStr := c.Param("id")
+	if idStr == "" {
+		utils.ErrorWithMessage(c, "Menu ID cannot be empty")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		utils.ErrorWithMessage(c, "Menu ID must be a positive integer")
+		return
+	}
+
+	menu, err := api.menuService.GetMenuByID(uint(id))
 	if err != nil {
-		utils.ErrorWithMessage(c, "菜单不存在")
+		utils.ErrorWithMessage(c, "Menu not found")
 		return
 	}
 
@@ -86,18 +98,40 @@ func (api *MenuAPI) GetMenuTree(c *gin.Context) {
 }
 
 func (api *MenuAPI) DeleteMenu(c *gin.Context) {
-	id := c.Param("id")
-	if err := api.menuService.DeleteMenu(getIDFromParam(id)); err != nil {
+	idStr := c.Param("id")
+	if idStr == "" {
+		utils.ErrorWithMessage(c, "Menu ID cannot be empty")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		utils.ErrorWithMessage(c, "Menu ID must be a positive integer")
+		return
+	}
+
+	if err := api.menuService.DeleteMenu(uint(id)); err != nil {
 		utils.ErrorWithMessage(c, err.Error())
 		return
 	}
 
-	utils.SuccessWithMessage(c, "删除成功")
+	utils.SuccessWithMessage(c, "Deleted successfully")
 }
 
 func (api *MenuAPI) GetMenusByRoleID(c *gin.Context) {
-	roleID := c.Param("role_id")
-	menus, err := api.menuService.GetMenusByRoleID(getIDFromParam(roleID))
+	roleIDStr := c.Param("role_id")
+	if roleIDStr == "" {
+		utils.ErrorWithMessage(c, "Role ID cannot be empty")
+		return
+	}
+
+	roleID, err := strconv.Atoi(roleIDStr)
+	if err != nil || roleID < 1 {
+		utils.ErrorWithMessage(c, "Role ID must be a positive integer")
+		return
+	}
+
+	menus, err := api.menuService.GetMenusByRoleID(uint(roleID))
 	if err != nil {
 		utils.ErrorWithMessage(c, err.Error())
 		return

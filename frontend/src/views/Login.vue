@@ -2,7 +2,7 @@
   <div class="login-container">
     <el-card class="login-card">
       <h2 class="login-title">WHU Campus Auth</h2>
-      <p class="login-subtitle">后台管理系统</p>
+      <p class="login-subtitle">Management System</p>
       
       <el-form
         ref="loginFormRef"
@@ -13,7 +13,7 @@
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
-            placeholder="用户名"
+            placeholder="Username"
             prefix-icon="User"
             size="large"
           />
@@ -23,7 +23,7 @@
           <el-input
             v-model="loginForm.password"
             type="password"
-            placeholder="密码"
+            placeholder="Password"
             prefix-icon="Lock"
             size="large"
             show-password
@@ -39,7 +39,7 @@
             class="login-button"
             @click="handleLogin"
           >
-            登录
+            Login
           </el-button>
         </el-form-item>
       </el-form>
@@ -65,10 +65,10 @@ const loginForm = reactive({
 
 const loginRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    { required: true, message: 'Please enter username', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
+    { required: true, message: 'Please enter password', trigger: 'blur' }
   ]
 }
 
@@ -79,7 +79,7 @@ const handleLogin = async () => {
       try {
         const result = await userStore.login(loginForm.username, loginForm.password)
         if (result.code === 0) {
-          ElMessage.success('登录成功')
+          ElMessage.success('Login successful')
           router.push('/dashboard')
         }
       } catch (error) {
