@@ -1,19 +1,19 @@
-# API 接口文档
+# API Documentation
 
-## 📋 概述
+## 📋 Overview
 
-本项目提供了一套完整的用户认证和权限管理 API 接口，包括用户管理、角色管理、菜单管理、字典管理和文件上传等功能。
+This project provides a comprehensive set of user authentication and permission management APIs, including user management, role management, menu management, dictionary management, and file upload functionality.
 
-### 基础信息
+### Basic Information
 
-- **基础路径**: `/api`
-- **认证方式**: JWT Token（除登录注册外）
-- **数据格式**: JSON
-- **字符编码**: UTF-8
+- **Base Path**: `/api`
+- **Authentication**: JWT Token (except login and registration)
+- **Data Format**: JSON
+- **Character Encoding**: UTF-8
 
-### 响应格式
+### Response Format
 
-#### 成功响应
+#### Success Response
 ```json
 {
   "code": 200,
@@ -22,39 +22,39 @@
 }
 ```
 
-#### 错误响应
+#### Error Response
 ```json
 {
   "code": 400,
-  "message": "错误信息",
+  "message": "Error message",
   "data": null
 }
 ```
 
-### 认证说明
+### Authentication
 
-除了登录和注册接口外，其他所有接口都需要在请求头中携带 JWT Token：
+Except for login and registration endpoints, all other endpoints require a JWT Token in the request header:
 
 ```
 Authorization: Bearer <token>
 ```
 
-或者使用自定义 header：
+Or use custom header:
 ```
 x-token: <token>
 ```
 
 ---
 
-## 🔐 认证接口 (Auth)
+## 🔐 Authentication APIs (Auth)
 
-### 1. 用户登录
+### 1. User Login
 
-**接口**: `POST /api/auth/login`
+**Endpoint**: `POST /api/auth/login`
 
-**权限**: 公开（无需认证）
+**Permission**: Public (no authentication required)
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "username": "string",
@@ -62,7 +62,7 @@ x-token: <token>
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -73,7 +73,7 @@ x-token: <token>
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/auth/login \
   -H "Content-Type: application/json" \
@@ -82,13 +82,13 @@ curl -X POST http://localhost:8888/api/auth/login \
 
 ---
 
-### 2. 用户注册
+### 2. User Registration
 
-**接口**: `POST /api/auth/register`
+**Endpoint**: `POST /api/auth/register`
 
-**权限**: 公开（无需认证）
+**Permission**: Public (no authentication required)
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "username": "string",
@@ -99,23 +99,23 @@ curl -X POST http://localhost:8888/api/auth/login \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "注册成功",
+  "message": "Registration successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
     "password": "123456",
-    "nickname": "测试用户",
+    "nickname": "Test User",
     "email": "test@example.com",
     "phone": "13800138000"
   }'
@@ -123,15 +123,15 @@ curl -X POST http://localhost:8888/api/auth/register \
 
 ---
 
-## 👤 用户接口 (User)
+## 👤 User APIs (User)
 
-### 1. 获取当前用户信息
+### 1. Get Current User Info
 
-**接口**: `GET /api/user/info`
+**Endpoint**: `GET /api/user/info`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -139,7 +139,7 @@ curl -X POST http://localhost:8888/api/auth/register \
   "data": {
     "id": 1,
     "username": "admin",
-    "nickname": "管理员",
+    "nickname": "Administrator",
     "avatar": "/uploads/avatar.jpg",
     "email": "admin@example.com",
     "phone": "13800138000",
@@ -148,7 +148,7 @@ curl -X POST http://localhost:8888/api/auth/register \
     "roles": [
       {
         "id": 1,
-        "name": "超级管理员",
+        "name": "Super Administrator",
         "code": "admin"
       }
     ]
@@ -156,7 +156,7 @@ curl -X POST http://localhost:8888/api/auth/register \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/user/info \
   -H "Authorization: Bearer <token>"
@@ -164,17 +164,17 @@ curl -X GET http://localhost:8888/api/user/info \
 
 ---
 
-### 2. 更新用户信息
+### 2. Update User Info
 
-**接口**: `PUT /api/user`
+**Endpoint**: `PUT /api/user`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "id": 1,
-  "nickname": "新昵称",
+  "nickname": "New Nickname",
   "avatar": "/uploads/new-avatar.jpg",
   "email": "new@example.com",
   "phone": "13900139000",
@@ -183,53 +183,53 @@ curl -X GET http://localhost:8888/api/user/info \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "更新成功",
+  "message": "Update successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X PUT http://localhost:8888/api/user \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "id": 1,
-    "nickname": "新昵称",
+    "nickname": "New Nickname",
     "email": "new@example.com"
   }'
 ```
 
 ---
 
-### 3. 修改密码
+### 3. Change Password
 
-**接口**: `PUT /api/user/password`
+**Endpoint**: `PUT /api/user/password`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
-  "old_password": "旧密码",
-  "new_password": "新密码"
+  "old_password": "Old password",
+  "new_password": "New password"
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "密码修改成功",
+  "message": "Password changed successfully",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X PUT http://localhost:8888/api/user/password \
   -H "Authorization: Bearer <token>" \
@@ -242,23 +242,23 @@ curl -X PUT http://localhost:8888/api/user/password \
 
 ---
 
-### 4. 获取用户列表
+### 4. Get User List
 
-**接口**: `GET /api/user/list`
+**Endpoint**: `GET /api/user/list`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "page": 1,
   "page_size": 10,
-  "username": "可选，用户名模糊搜索",
+  "username": "Optional, username fuzzy search",
   "status": 0
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -268,7 +268,7 @@ curl -X PUT http://localhost:8888/api/user/password \
       {
         "id": 1,
         "username": "admin",
-        "nickname": "管理员",
+        "nickname": "Administrator",
         "email": "admin@example.com",
         "status": 1
       }
@@ -278,7 +278,7 @@ curl -X PUT http://localhost:8888/api/user/password \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET "http://localhost:8888/api/user/list?page=1&page_size=10" \
   -H "Authorization: Bearer <token>"
@@ -286,25 +286,25 @@ curl -X GET "http://localhost:8888/api/user/list?page=1&page_size=10" \
 
 ---
 
-### 5. 删除用户
+### 5. Delete User
 
-**接口**: `DELETE /api/user/:id`
+**Endpoint**: `DELETE /api/user/:id`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**路径参数**:
-- `id`: 用户 ID
+**Path Parameters**:
+- `id`: User ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "删除成功",
+  "message": "Delete successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X DELETE http://localhost:8888/api/user/1 \
   -H "Authorization: Bearer <token>"
@@ -312,13 +312,13 @@ curl -X DELETE http://localhost:8888/api/user/1 \
 
 ---
 
-### 6. 分配角色
+### 6. Assign Roles
 
-**接口**: `POST /api/user/assign-roles`
+**Endpoint**: `POST /api/user/assign-roles`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "user_id": 1,
@@ -326,16 +326,16 @@ curl -X DELETE http://localhost:8888/api/user/1 \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "分配角色成功",
+  "message": "Roles assigned successfully",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/user/assign-roles \
   -H "Authorization: Bearer <token>" \
@@ -348,16 +348,16 @@ curl -X POST http://localhost:8888/api/user/assign-roles \
 
 ---
 
-### 7. 上传头像
+### 7. Upload Avatar
 
-**接口**: `POST /api/user/avatar`
+**Endpoint**: `POST /api/user/avatar`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**: `multipart/form-data`
-- `file`: 头像图片文件
+**Request Parameters**: `multipart/form-data`
+- `file`: Avatar image file
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -370,7 +370,7 @@ curl -X POST http://localhost:8888/api/user/assign-roles \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/user/avatar \
   -H "Authorization: Bearer <token>" \
@@ -379,43 +379,43 @@ curl -X POST http://localhost:8888/api/user/avatar \
 
 ---
 
-## 🎭 角色接口 (Role)
+## 🎭 Role APIs (Role)
 
-### 1. 创建角色
+### 1. Create Role
 
-**接口**: `POST /api/role`
+**Endpoint**: `POST /api/role`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
-  "name": "角色名称",
+  "name": "Role Name",
   "code": "role_code",
-  "desc": "角色描述",
+  "desc": "Role Description",
   "status": 1,
   "menu_ids": [1, 2, 3]
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "创建成功",
+  "message": "Create successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/role \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "普通用户",
+    "name": "Regular User",
     "code": "user",
-    "desc": "普通用户角色",
+    "desc": "Regular user role",
     "status": 1,
     "menu_ids": [1, 2]
   }'
@@ -423,71 +423,71 @@ curl -X POST http://localhost:8888/api/role \
 
 ---
 
-### 2. 更新角色
+### 2. Update Role
 
-**接口**: `PUT /api/role`
+**Endpoint**: `PUT /api/role`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "id": 1,
-  "name": "新角色名称",
+  "name": "New Role Name",
   "code": "new_role_code",
-  "desc": "新描述",
+  "desc": "New Description",
   "status": 1,
   "menu_ids": [1, 2, 3]
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "更新成功",
+  "message": "Update successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X PUT http://localhost:8888/api/role \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "id": 1,
-    "name": "新角色名称",
+    "name": "New Role Name",
     "menu_ids": [1, 2, 3]
   }'
 ```
 
 ---
 
-### 3. 获取角色详情
+### 3. Get Role Details
 
-**接口**: `GET /api/role/:id`
+**Endpoint**: `GET /api/role/:id`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**路径参数**:
-- `id`: 角色 ID
+**Path Parameters**:
+- `id`: Role ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
   "message": "success",
   "data": {
     "id": 1,
-    "name": "超级管理员",
+    "name": "Super Administrator",
     "code": "admin",
-    "desc": "超级管理员角色",
+    "desc": "Super Administrator Role",
     "status": 1,
     "menus": [
       {
         "id": 1,
-        "name": "用户管理",
+        "name": "User Management",
         "path": "/user"
       }
     ]
@@ -495,7 +495,7 @@ curl -X PUT http://localhost:8888/api/role \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/role/1 \
   -H "Authorization: Bearer <token>"
@@ -503,23 +503,23 @@ curl -X GET http://localhost:8888/api/role/1 \
 
 ---
 
-### 4. 获取角色列表
+### 4. Get Role List
 
-**接口**: `GET /api/role/list`
+**Endpoint**: `GET /api/role/list`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "page": 1,
   "page_size": 10,
-  "name": "可选，角色名称模糊搜索",
+  "name": "Optional, role name fuzzy search",
   "status": 0
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -528,7 +528,7 @@ curl -X GET http://localhost:8888/api/role/1 \
     "list": [
       {
         "id": 1,
-        "name": "超级管理员",
+        "name": "Super Administrator",
         "code": "admin",
         "status": 1
       }
@@ -538,7 +538,7 @@ curl -X GET http://localhost:8888/api/role/1 \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET "http://localhost:8888/api/role/list?page=1&page_size=10" \
   -H "Authorization: Bearer <token>"
@@ -546,25 +546,25 @@ curl -X GET "http://localhost:8888/api/role/list?page=1&page_size=10" \
 
 ---
 
-### 5. 删除角色
+### 5. Delete Role
 
-**接口**: `DELETE /api/role/:id`
+**Endpoint**: `DELETE /api/role/:id`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**路径参数**:
-- `id`: 角色 ID
+**Path Parameters**:
+- `id`: Role ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "删除成功",
+  "message": "Delete successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X DELETE http://localhost:8888/api/role/1 \
   -H "Authorization: Bearer <token>"
@@ -572,13 +572,13 @@ curl -X DELETE http://localhost:8888/api/role/1 \
 
 ---
 
-### 6. 获取所有角色
+### 6. Get All Roles
 
-**接口**: `GET /api/role/all`
+**Endpoint**: `GET /api/role/all`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -586,19 +586,19 @@ curl -X DELETE http://localhost:8888/api/role/1 \
   "data": [
     {
       "id": 1,
-      "name": "超级管理员",
+      "name": "Super Administrator",
       "code": "admin"
     },
     {
       "id": 2,
-      "name": "普通用户",
+      "name": "Regular User",
       "code": "user"
     }
   ]
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/role/all \
   -H "Authorization: Bearer <token>"
@@ -606,18 +606,18 @@ curl -X GET http://localhost:8888/api/role/all \
 
 ---
 
-## 📋 菜单接口 (Menu)
+## 📋 Menu APIs (Menu)
 
-### 1. 创建菜单
+### 1. Create Menu
 
-**接口**: `POST /api/menu`
+**Endpoint**: `POST /api/menu`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
-  "name": "菜单名称",
+  "name": "Menu Name",
   "path": "/user",
   "component": "user/index",
   "icon": "user",
@@ -628,22 +628,22 @@ curl -X GET http://localhost:8888/api/role/all \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "创建成功",
+  "message": "Create successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/menu \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "用户管理",
+    "name": "User Management",
     "path": "/user",
     "component": "user/index",
     "icon": "user",
@@ -656,17 +656,17 @@ curl -X POST http://localhost:8888/api/menu \
 
 ---
 
-### 2. 更新菜单
+### 2. Update Menu
 
-**接口**: `PUT /api/menu`
+**Endpoint**: `PUT /api/menu`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "id": 1,
-  "name": "新菜单名称",
+  "name": "New Menu Name",
   "path": "/new-path",
   "component": "new/component",
   "icon": "new-icon",
@@ -677,46 +677,46 @@ curl -X POST http://localhost:8888/api/menu \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "更新成功",
+  "message": "Update successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X PUT http://localhost:8888/api/menu \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "id": 1,
-    "name": "新菜单名称",
+    "name": "New Menu Name",
     "sort": 2
   }'
 ```
 
 ---
 
-### 3. 获取菜单详情
+### 3. Get Menu Details
 
-**接口**: `GET /api/menu/:id`
+**Endpoint**: `GET /api/menu/:id`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**路径参数**:
-- `id`: 菜单 ID
+**Path Parameters**:
+- `id`: Menu ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
   "message": "success",
   "data": {
     "id": 1,
-    "name": "用户管理",
+    "name": "User Management",
     "path": "/user",
     "component": "user/index",
     "icon": "user",
@@ -728,7 +728,7 @@ curl -X PUT http://localhost:8888/api/menu \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/menu/1 \
   -H "Authorization: Bearer <token>"
@@ -736,13 +736,13 @@ curl -X GET http://localhost:8888/api/menu/1 \
 
 ---
 
-### 4. 获取菜单列表
+### 4. Get Menu List
 
-**接口**: `GET /api/menu/list`
+**Endpoint**: `GET /api/menu/list`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "page": 1,
@@ -750,7 +750,7 @@ curl -X GET http://localhost:8888/api/menu/1 \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -759,7 +759,7 @@ curl -X GET http://localhost:8888/api/menu/1 \
     "list": [
       {
         "id": 1,
-        "name": "用户管理",
+        "name": "User Management",
         "path": "/user",
         "sort": 1
       }
@@ -769,7 +769,7 @@ curl -X GET http://localhost:8888/api/menu/1 \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET "http://localhost:8888/api/menu/list?page=1&page_size=10" \
   -H "Authorization: Bearer <token>"
@@ -777,13 +777,13 @@ curl -X GET "http://localhost:8888/api/menu/list?page=1&page_size=10" \
 
 ---
 
-### 5. 获取菜单树
+### 5. Get Menu Tree
 
-**接口**: `GET /api/menu/tree`
+**Endpoint**: `GET /api/menu/tree`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -791,15 +791,15 @@ curl -X GET "http://localhost:8888/api/menu/list?page=1&page_size=10" \
   "data": [
     {
       "id": 1,
-      "name": "系统管理",
+      "name": "System Management",
       "children": [
         {
           "id": 2,
-          "name": "用户管理"
+          "name": "User Management"
         },
         {
           "id": 3,
-          "name": "角色管理"
+          "name": "Role Management"
         }
       ]
     }
@@ -807,7 +807,7 @@ curl -X GET "http://localhost:8888/api/menu/list?page=1&page_size=10" \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/menu/tree \
   -H "Authorization: Bearer <token>"
@@ -815,25 +815,25 @@ curl -X GET http://localhost:8888/api/menu/tree \
 
 ---
 
-### 6. 删除菜单
+### 6. Delete Menu
 
-**接口**: `DELETE /api/menu/:id`
+**Endpoint**: `DELETE /api/menu/:id`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**路径参数**:
-- `id`: 菜单 ID
+**Path Parameters**:
+- `id`: Menu ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "删除成功",
+  "message": "Delete successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X DELETE http://localhost:8888/api/menu/1 \
   -H "Authorization: Bearer <token>"
@@ -841,16 +841,16 @@ curl -X DELETE http://localhost:8888/api/menu/1 \
 
 ---
 
-### 7. 获取角色的菜单
+### 7. Get Role Menus
 
-**接口**: `GET /api/menu/role/:role_id`
+**Endpoint**: `GET /api/menu/role/:role_id`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**路径参数**:
-- `role_id`: 角色 ID
+**Path Parameters**:
+- `role_id`: Role ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -858,19 +858,19 @@ curl -X DELETE http://localhost:8888/api/menu/1 \
   "data": [
     {
       "id": 1,
-      "name": "用户管理",
+      "name": "User Management",
       "path": "/user"
     },
     {
       "id": 2,
-      "name": "角色管理",
+      "name": "Role Management",
       "path": "/role"
     }
   ]
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/menu/role/1 \
   -H "Authorization: Bearer <token>"
@@ -878,34 +878,34 @@ curl -X GET http://localhost:8888/api/menu/role/1 \
 
 ---
 
-## 📖 字典接口 (Dict)
+## 📖 Dictionary APIs (Dict)
 
-### 1. 根据编码查询字典（公开）
+### 1. Get Dictionary by Code (Public)
 
-**接口**: `GET /api/dict/code/:code`
+**Endpoint**: `GET /api/dict/code/:code`
 
-**权限**: 公开（无需认证）
+**Permission**: Public (no authentication required)
 
-**路径参数**:
-- `code`: 字典编码
+**Path Parameters**:
+- `code`: Dictionary code
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
   "message": "success",
   "data": {
     "id": 1,
-    "name": "性别字典",
+    "name": "Gender Dictionary",
     "code": "gender",
     "items": [
       {
-        "label": "男",
+        "label": "Male",
         "value": "1",
         "sort": 1
       },
       {
-        "label": "女",
+        "label": "Female",
         "value": "2",
         "sort": 2
       }
@@ -914,36 +914,36 @@ curl -X GET http://localhost:8888/api/menu/role/1 \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/dict/code/gender
 ```
 
 ---
 
-### 2. 获取字典详情
+### 2. Get Dictionary Details
 
-**接口**: `GET /api/dict/:id`
+**Endpoint**: `GET /api/dict/:id`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**路径参数**:
-- `id`: 字典 ID
+**Path Parameters**:
+- `id`: Dictionary ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
   "message": "success",
   "data": {
     "id": 1,
-    "name": "性别字典",
+    "name": "Gender Dictionary",
     "code": "gender",
-    "desc": "性别字典",
+    "desc": "Gender Dictionary",
     "status": 1,
     "items": [
       {
-        "label": "男",
+        "label": "Male",
         "value": "1",
         "sort": 1
       }
@@ -952,7 +952,7 @@ curl -X GET http://localhost:8888/api/dict/code/gender
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET http://localhost:8888/api/dict/1 \
   -H "Authorization: Bearer <token>"
@@ -960,23 +960,23 @@ curl -X GET http://localhost:8888/api/dict/1 \
 
 ---
 
-### 3. 获取字典列表
+### 3. Get Dictionary List
 
-**接口**: `GET /api/dict/list`
+**Endpoint**: `GET /api/dict/list`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "page": 1,
   "page_size": 10,
-  "name": "可选，字典名称模糊搜索",
+  "name": "Optional, dictionary name fuzzy search",
   "status": 0
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -985,7 +985,7 @@ curl -X GET http://localhost:8888/api/dict/1 \
     "list": [
       {
         "id": 1,
-        "name": "性别字典",
+        "name": "Gender Dictionary",
         "code": "gender",
         "status": 1
       }
@@ -995,7 +995,7 @@ curl -X GET http://localhost:8888/api/dict/1 \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X GET "http://localhost:8888/api/dict/list?page=1&page_size=10" \
   -H "Authorization: Bearer <token>"
@@ -1003,22 +1003,22 @@ curl -X GET "http://localhost:8888/api/dict/list?page=1&page_size=10" \
 
 ---
 
-### 4. 创建字典
+### 4. Create Dictionary
 
-**接口**: `POST /api/dict`
+**Endpoint**: `POST /api/dict`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
-  "name": "字典名称",
+  "name": "Dictionary Name",
   "code": "dict_code",
-  "desc": "字典描述",
+  "desc": "Dictionary Description",
   "status": 1,
   "items": [
     {
-      "label": "选项 1",
+      "label": "Option 1",
       "value": "1",
       "sort": 1,
       "status": 1
@@ -1027,34 +1027,34 @@ curl -X GET "http://localhost:8888/api/dict/list?page=1&page_size=10" \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "创建成功",
+  "message": "Create successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/dict \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "性别字典",
+    "name": "Gender Dictionary",
     "code": "gender",
-    "desc": "性别字典",
+    "desc": "Gender Dictionary",
     "status": 1,
     "items": [
       {
-        "label": "男",
+        "label": "Male",
         "value": "1",
         "sort": 1,
         "status": 1
       },
       {
-        "label": "女",
+        "label": "Female",
         "value": "2",
         "sort": 2,
         "status": 1
@@ -1065,23 +1065,23 @@ curl -X POST http://localhost:8888/api/dict \
 
 ---
 
-### 5. 更新字典
+### 5. Update Dictionary
 
-**接口**: `PUT /api/dict`
+**Endpoint**: `PUT /api/dict`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**请求参数**:
+**Request Parameters**:
 ```json
 {
   "id": 1,
-  "name": "新字典名称",
+  "name": "New Dictionary Name",
   "code": "new_code",
-  "desc": "新描述",
+  "desc": "New Description",
   "status": 1,
   "items": [
     {
-      "label": "选项 1",
+      "label": "Option 1",
       "value": "1",
       "sort": 1
     }
@@ -1089,26 +1089,26 @@ curl -X POST http://localhost:8888/api/dict \
 }
 ```
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "更新成功",
+  "message": "Update successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X PUT http://localhost:8888/api/dict \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "id": 1,
-    "name": "新字典名称",
+    "name": "New Dictionary Name",
     "items": [
       {
-        "label": "男",
+        "label": "Male",
         "value": "1",
         "sort": 1
       }
@@ -1118,25 +1118,25 @@ curl -X PUT http://localhost:8888/api/dict \
 
 ---
 
-### 6. 删除字典
+### 6. Delete Dictionary
 
-**接口**: `DELETE /api/dict/:id`
+**Endpoint**: `DELETE /api/dict/:id`
 
-**权限**: 管理员
+**Permission**: Administrator
 
-**路径参数**:
-- `id`: 字典 ID
+**Path Parameters**:
+- `id`: Dictionary ID
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "删除成功",
+  "message": "Delete successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X DELETE http://localhost:8888/api/dict/1 \
   -H "Authorization: Bearer <token>"
@@ -1144,18 +1144,18 @@ curl -X DELETE http://localhost:8888/api/dict/1 \
 
 ---
 
-## 📤 上传接口 (Upload)
+## 📤 Upload APIs (Upload)
 
-### 1. 上传文件
+### 1. Upload File
 
-**接口**: `POST /api/upload`
+**Endpoint**: `POST /api/upload`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**请求参数**: `multipart/form-data`
-- `file`: 要上传的文件
+**Request Parameters**: `multipart/form-data`
+- `file`: File to upload
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
@@ -1168,7 +1168,7 @@ curl -X DELETE http://localhost:8888/api/dict/1 \
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X POST http://localhost:8888/api/upload \
   -H "Authorization: Bearer <token>" \
@@ -1177,25 +1177,25 @@ curl -X POST http://localhost:8888/api/upload \
 
 ---
 
-### 2. 删除文件
+### 2. Delete File
 
-**接口**: `DELETE /api/upload/:file_name`
+**Endpoint**: `DELETE /api/upload/:file_name`
 
-**权限**: 已认证用户
+**Permission**: Authenticated users
 
-**路径参数**:
-- `file_name`: 文件名
+**Path Parameters**:
+- `file_name`: File name
 
-**响应示例**:
+**Response Example**:
 ```json
 {
   "code": 200,
-  "message": "删除成功",
+  "message": "Delete successful",
   "data": null
 }
 ```
 
-**curl 示例**:
+**curl Example**:
 ```bash
 curl -X DELETE http://localhost:8888/api/upload/example-123.jpg \
   -H "Authorization: Bearer <token>"
@@ -1203,80 +1203,80 @@ curl -X DELETE http://localhost:8888/api/upload/example-123.jpg \
 
 ---
 
-## 🔒 权限说明
+## 🔒 Permission Description
 
-### 权限级别
+### Permission Levels
 
-| 权限级别 | 说明 | 接口示例 |
+| Permission Level | Description | API Examples |
 |---------|------|---------|
-| 公开 | 无需认证即可访问 | `/api/auth/login`, `/api/auth/register`, `/api/dict/code/:code` |
-| 已认证用户 | 需要 JWT Token | `/api/user/info`, `/api/user/list` |
-| 管理员 | 需要管理员角色 | `/api/role`, `/api/menu`, `/api/dict`（写操作） |
+| Public | No authentication required | `/api/auth/login`, `/api/auth/register`, `/api/dict/code/:code` |
+| Authenticated User | Requires JWT Token | `/api/user/info`, `/api/user/list` |
+| Administrator | Requires administrator role | `/api/role`, `/api/menu`, `/api/dict` (write operations) |
 
-### 管理员接口列表
+### Administrator API List
 
-以下接口需要管理员权限：
-- `POST /api/role` - 创建角色
-- `PUT /api/role` - 更新角色
-- `DELETE /api/role/:id` - 删除角色
-- `POST /api/menu` - 创建菜单
-- `PUT /api/menu` - 更新菜单
-- `DELETE /api/menu/:id` - 删除菜单
-- `POST /api/dict` - 创建字典
-- `PUT /api/dict` - 更新字典
-- `DELETE /api/dict/:id` - 删除字典
+The following endpoints require administrator permission:
+- `POST /api/role` - Create role
+- `PUT /api/role` - Update role
+- `DELETE /api/role/:id` - Delete role
+- `POST /api/menu` - Create menu
+- `PUT /api/menu` - Update menu
+- `DELETE /api/menu/:id` - Delete menu
+- `POST /api/dict` - Create dictionary
+- `PUT /api/dict` - Update dictionary
+- `DELETE /api/dict/:id` - Delete dictionary
 
 ---
 
-## 📊 错误码说明
+## 📊 Error Codes
 
-| 错误码 | 说明 |
+| Error Code | Description |
 |--------|------|
-| 200 | 成功 |
-| 400 | 请求参数错误 |
-| 401 | 未认证或 Token 过期 |
-| 403 | 权限不足 |
-| 404 | 资源不存在 |
-| 500 | 服务器内部错误 |
+| 200 | Success |
+| 400 | Bad request parameters |
+| 401 | Unauthorized or token expired |
+| 403 | Insufficient permissions |
+| 404 | Resource not found |
+| 500 | Internal server error |
 
 ---
 
-## 💡 使用示例
+## 💡 Usage Examples
 
-### 完整流程示例
+### Complete Workflow Example
 
 ```bash
-# 1. 登录获取 Token
+# 1. Login to get token
 TOKEN=$(curl -s -X POST http://localhost:8888/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"123456"}' \
   | jq -r '.data.token')
 
-# 2. 使用 Token 访问受保护的接口
+# 2. Use token to access protected endpoints
 curl -X GET http://localhost:8888/api/user/info \
   -H "Authorization: Bearer $TOKEN"
 
-# 3. 获取用户列表
+# 3. Get user list
 curl -X GET "http://localhost:8888/api/user/list?page=1&page_size=10" \
   -H "Authorization: Bearer $TOKEN"
 
-# 4. 获取字典数据（公开接口，无需 Token）
+# 4. Get dictionary data (public endpoint, no token required)
 curl -X GET http://localhost:8888/api/dict/code/gender
 ```
 
 ---
 
-## 📝 更新日志
+## 📝 Changelog
 
-- **v1.0.0** - 初始版本
-  - 用户认证和管理
-  - 角色和权限管理
-  - 菜单管理
-  - 字典管理
-  - 文件上传
+- **v1.0.0** - Initial release
+  - User authentication and management
+  - Role and permission management
+  - Menu management
+  - Dictionary management
+  - File upload
 
 ---
 
-## 📞 技术支持
+## 📞 Technical Support
 
-如有问题，请查看项目文档或联系开发团队。
+If you have any questions, please refer to the project documentation or contact the development team.

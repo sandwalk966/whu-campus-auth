@@ -15,45 +15,45 @@ func InitDictData(db *gorm.DB) {
 	
 	dicts := []req.CreateDictRequest{
 		{
-			Name: "性别字典",
+			Name: "Gender Dictionary",
 			Code: "gender",
-			Desc: "系统性别选项",
+			Desc: "System gender options",
 			Status: 1,
 			Items: []req.DictItemReq{
-				{Label: "男", Value: "1", Sort: 1, Status: 1},
-				{Label: "女", Value: "2", Sort: 2, Status: 1},
-				{Label: "未知", Value: "0", Sort: 3, Status: 1},
+				{Label: "Male", Value: "1", Sort: 1, Status: 1},
+				{Label: "Female", Value: "2", Sort: 2, Status: 1},
+				{Label: "Unknown", Value: "0", Sort: 3, Status: 1},
 			},
 		},
 		{
-			Name: "用户状态",
+			Name: "User Status",
 			Code: "user_status",
-			Desc: "用户账号状态",
+			Desc: "User account status",
 			Status: 1,
 			Items: []req.DictItemReq{
-				{Label: "正常", Value: "1", Sort: 1, Status: 1},
-				{Label: "禁用", Value: "0", Sort: 2, Status: 1},
+				{Label: "Active", Value: "1", Sort: 1, Status: 1},
+				{Label: "Disabled", Value: "0", Sort: 2, Status: 1},
 			},
 		},
 		{
-			Name: "菜单类型",
+			Name: "Menu Type",
 			Code: "menu_type",
-			Desc: "系统菜单类型",
+			Desc: "System menu type",
 			Status: 1,
 			Items: []req.DictItemReq{
-				{Label: "目录", Value: "1", Sort: 1, Status: 1},
-				{Label: "菜单", Value: "2", Sort: 2, Status: 1},
-				{Label: "按钮", Value: "3", Sort: 3, Status: 1},
+				{Label: "Directory", Value: "1", Sort: 1, Status: 1},
+				{Label: "Menu", Value: "2", Sort: 2, Status: 1},
+				{Label: "Button", Value: "3", Sort: 3, Status: 1},
 			},
 		},
 		{
-			Name: "角色状态",
+			Name: "Role Status",
 			Code: "role_status",
-			Desc: "角色状态",
+			Desc: "Role status",
 			Status: 1,
 			Items: []req.DictItemReq{
-				{Label: "启用", Value: "1", Sort: 1, Status: 1},
-				{Label: "禁用", Value: "0", Sort: 2, Status: 1},
+				{Label: "Active", Value: "1", Sort: 1, Status: 1},
+				{Label: "Disabled", Value: "0", Sort: 2, Status: 1},
 			},
 		},
 	}

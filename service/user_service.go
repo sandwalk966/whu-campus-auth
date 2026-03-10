@@ -63,6 +63,16 @@ func (s *UserService) Login(loginReq req.LoginRequest) (string, *db.User, error)
 		return "", nil, err
 	}
 
+	// 登录成功：删除旧的 token 和禁用标记
+	s.redisService.DeleteUserToken(user.ID)
+	s.redisService.RemoveUserDisabled(user.ID)
+
+	// 将新 token 存入 Redis
+	err = s.redisService.StoreUserToken(user.ID, token, j.ExpiresTime)
+	if err != nil {
+		utils.LogErrorf("存储 token 到 Redis 失败：%v", err)
+	}
+
 	return token, user, nil
 }
 
@@ -152,20 +162,11 @@ func (s *UserService) GetUserByID(id uint) (*db.User, error) {
 
 // GetUserByIDWithCache 带缓存的用户查询（推荐方法）
 func (s *UserService) GetUserByIDWithCache(id uint) (*db.User, error) {
-	// 1. 先尝试从缓存获取
-	cachedUser, err := s.redisService.GetCachedUserInfo(id)
-	if err == nil && cachedUser != nil {
-		return cachedUser, nil
-	}
-
-	// 2. 缓存未命中，从数据库获取
+	// 2. 缓存未命中，从数据库获取（暂时不缓存，确保 Roles 和 Menus 正确加载）
 	user, err := s.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
-
-	// 3. 存入缓存（5 分钟）
-	s.redisService.CacheUserInfo(id, user, 5*time.Minute)
 
 	return user, nil
 }

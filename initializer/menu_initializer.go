@@ -1,6 +1,7 @@
 package initializer
 
 import (
+	"fmt"
 	"whu-campus-auth/dao"
 	dbModel "whu-campus-auth/model/db"
 
@@ -9,22 +10,25 @@ import (
 )
 
 // InitMenus 初始化默认菜单
+// InitMenus 初始化默认菜单
 // 在项目启动时调用，自动创建常用菜单
-func InitMenus(db *gorm.DB) {
+func InitMenus(db *gorm.DB) error {
 	menuDAO := dao.NewMenuDAO(db)
 
 	// 检查是否已有菜单
 	var count int64
-	db.Model(&dbModel.Menu{}).Count(&count)
+	if err := db.Model(&dbModel.Menu{}).Count(&count).Error; err != nil {
+		return fmt.Errorf("检查菜单数量失败：%w", err)
+	}
 	zap.L().Info("菜单初始化检查", zap.Int64("当前菜单数量", count))
 	if count > 0 {
 		zap.L().Info("菜单已存在，跳过初始化")
-		return
+		return nil
 	}
 
 	// 1. 创建一级菜单：系统管理
 	systemMenu := &dbModel.Menu{
-		Name:      "系统管理",
+		Name:      "System Management",
 		Path:      "/system",
 		Component: "layout",
 		Icon:      "Setting",
@@ -36,13 +40,13 @@ func InitMenus(db *gorm.DB) {
 
 	if err := menuDAO.Create(systemMenu); err != nil {
 		zap.L().Error("创建系统管理菜单失败", zap.Error(err))
-		return
+		return fmt.Errorf("创建系统管理菜单失败：%w", err)
 	}
 
 	// 2. 创建二级菜单
 	menus := []dbModel.Menu{
 		{
-			Name:      "用户管理",
+			Name:      "User Management",
 			Path:      "/user",
 			Component: "user/index",
 			Icon:      "User",
@@ -52,7 +56,7 @@ func InitMenus(db *gorm.DB) {
 			Status:    1,
 		},
 		{
-			Name:      "角色管理",
+			Name:      "Role Management",
 			Path:      "/role",
 			Component: "role/index",
 			Icon:      "UserFilled",
@@ -62,7 +66,7 @@ func InitMenus(db *gorm.DB) {
 			Status:    1,
 		},
 		{
-			Name:      "菜单管理",
+			Name:      "Menu Management",
 			Path:      "/menu",
 			Component: "menu/index",
 			Icon:      "Menu",
@@ -72,7 +76,7 @@ func InitMenus(db *gorm.DB) {
 			Status:    1,
 		},
 		{
-			Name:      "字典管理",
+			Name:      "Dictionary Management",
 			Path:      "/dict",
 			Component: "dict/index",
 			Icon:      "Collection",
@@ -100,15 +104,17 @@ func InitMenus(db *gorm.DB) {
 		var allMenus []dbModel.Menu
 		if err := db.Find(&allMenus).Error; err != nil {
 			zap.L().Error("获取所有菜单失败", zap.Error(err))
-			return
+			return fmt.Errorf("获取所有菜单失败：%w", err)
 		}
 
 		// 分配菜单
 		if err := db.Model(&adminRole).Association("Menus").Append(allMenus); err != nil {
 			zap.L().Error("为管理员角色分配菜单失败", zap.Error(err))
-			return
+			return fmt.Errorf("为管理员角色分配菜单失败：%w", err)
 		}
 
 		zap.L().Info("为管理员角色分配菜单成功", zap.Int("count", len(allMenus)))
 	}
+	
+	return nil
 }

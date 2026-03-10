@@ -1,259 +1,480 @@
 # WHU Campus Auth
 
-武汉大学校园权限管理系统
+Wuhan University Campus Permission Management System
 
-## 项目结构
+## Project Structure
 
 ```
 whu-campus-auth/
-├── cmd/                 # 启动入口
+├── cmd/                 # Entry point
 │   └── main.go
-├── config/              # 配置文件
+├── config/              # Configuration
 │   ├── config.go
 │   └── config.yaml
-├── dao/                 # 数据访问层
+├── dao/                 # Data Access Layer
 │   ├── base_dao.go
 │   ├── user_dao.go
 │   ├── role_dao.go
 │   ├── menu_dao.go
 │   └── dict_dao.go
-├── api/                 # 接口层（controller）
+├── api/                 # Controller Layer
 │   ├── user.go
 │   ├── role.go
 │   ├── menu.go
 │   ├── dict.go
 │   └── upload.go
-├── service/             # 业务逻辑层
+├── service/             # Business Logic Layer
 │   ├── user_service.go
 │   ├── role_service.go
 │   ├── menu_service.go
 │   ├── dict_service.go
 │   └── upload_service.go
-├── model/               # 数据库模型 & 请求参数
-│   ├── db/              # 数据库表结构体
+├── model/               # Models & Request DTOs
+│   ├── db/              # Database models
 │   │   ├── user.go
 │   │   ├── role.go
 │   │   ├── menu.go
 │   │   └── dict.go
-│   └── req/             # 前端入参结构体
+│   └── req/             # Request DTOs
 │       ├── user.go
 │       ├── role.go
 │       ├── menu.go
 │       ├── dict.go
 │       └── upload.go
-├── middleware/          # 中间件
-│   ├── jwt.go           # JWT 认证中间件
-│   ├── casbin_rbac.go   # RBAC 权限中间件
-│   ├── db.go            # 数据库连接中间件
-│   └── logger.go        # 日志中间件
-├── utils/               # 工具类
+├── middleware/          # Middleware
+│   ├── jwt.go           # JWT Authentication
+│   ├── casbin_rbac.go   # RBAC Authorization
+│   ├── db.go            # Database Connection
+│   └── logger.go        # Logging
+├── utils/               # Utilities
 │   ├── jwt.go
 │   ├── response.go
 │   ├── upload.go
 │   └── redis.go
-├── router/              # 路由配置
-│   ├── auth_routes.go   # 认证路由
-│   ├── user_routes.go   # 用户路由
-│   ├── role_routes.go   # 角色路由
-│   ├── menu_routes.go   # 菜单路由
-│   ├── dict_routes.go   # 字典路由
-│   └── static_routes.go # 静态文件路由
-├── initializer/         # 初始化模块
-│   ├── initializer.go   # 统一初始化入口
-│   ├── database.go      # 数据库初始化
-│   ├── redis.go         # Redis 初始化
-│   ├── migrator.go      # 数据库迁移
-│   ├── admin_initializer.go  # 管理员账户初始化
-│   ├── deps.go          # 依赖注入
-│   ├── api.go           # API 层初始化
-│   ├── dao.go           # DAO 层初始化
-│   ├── service.go       # Service 层初始化
-│   └── router.go        # 路由初始化
-├── scripts/             # 运维脚本
-│   ├── letsencrypt.sh   # Let's Encrypt 证书管理
-│   ├── generate-ssl-cert.sh  # 自签名证书生成
-│   ├── monitor-logs.sh  # 日志监控
-│   └── monitor-performance.sh  # 性能监控
-├── nginx/               # Nginx 配置
-│   ├── nginx.conf       # Nginx 配置文件
-│   └── healthcheck.sh   # 健康检查脚本
-├── ssl/                 # SSL 证书目录（自动生成）
-├── uploads/             # 上传文件目录
-├── frontend/            # 前端项目
+├── router/              # Router Configuration
+│   ├── auth_routes.go   # Authentication routes
+│   ├── user_routes.go   # User routes
+│   ├── role_routes.go   # Role routes
+│   ├── menu_routes.go   # Menu routes
+│   ├── dict_routes.go   # Dictionary routes
+│   └── static_routes.go # Static file routes
+├── initializer/         # Initialization Modules
+│   ├── initializer.go   # Unified initialization
+│   ├── database.go      # Database initialization
+│   ├── redis.go         # Redis initialization
+│   ├── migrator.go      # Database migration
+│   ├── admin_initializer.go  # Admin account initialization
+│   ├── deps.go          # Dependency injection
+│   ├── api.go           # API layer initialization
+│   ├── dao.go           # DAO layer initialization
+│   ├── service.go       # Service layer initialization
+│   └── router.go        # Router initialization
+├── scripts/             # Operations Scripts
+│   ├── letsencrypt.sh   # Let's Encrypt certificate management
+│   ├── generate-ssl-cert.sh  # Self-signed certificate generation
+│   ├── monitor-logs.sh  # Log monitoring
+│   └── monitor-performance.sh  # Performance monitoring
+├── nginx/               # Nginx Configuration
+│   ├── nginx.conf       # Nginx configuration file
+│   └── healthcheck.sh   # Health check script
+├── ssl/                 # SSL certificates (auto-generated)
+├── uploads/             # Uploaded files
+├── frontend/            # Frontend Project
 │   ├── src/
-│   │   ├── api/         # API 调用
-│   │   ├── layouts/     # 布局组件
-│   │   ├── router/      # 路由配置
-│   │   ├── stores/      # 状态管理
-│   │   ├── utils/       # 工具函数
-│   │   └── views/       # 页面组件
+│   │   ├── api/         # API calls
+│   │   ├── layouts/     # Layout components
+│   │   ├── router/      # Router configuration
+│   │   ├── stores/      # State management (Pinia)
+│   │   ├── utils/       # Utility functions
+│   │   └── views/       # Page components
 │   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
-├── docker-compose.yml   # Docker Compose 配置
-├── .env                 # 环境变量
-├── .dockerignore        # Docker 构建忽略文件
+├── docker-compose.yml   # Docker Compose configuration
+├── .env                 # Environment variables
+├── .dockerignore        # Docker ignore file
 ├── go.mod
 ├── go.sum
 └── .env
 ```
 
-## 快速开始
-
-### 环境要求
+## Requirements
 
 - Go 1.25+
 - MySQL 5.7+
-- Redis (可选)
-- Node.js 16+ (前端)
-- Docker & Docker Compose（推荐）
+- Redis (optional)
+- Node.js 16+ (frontend)
+- Docker & Docker Compose (recommended)
 
-### 方式一：Docker 部署（推荐）
+## Default Administrator Account
+
+The system automatically creates a default administrator account on first startup:
+
+| Field | Value |
+|-------|-------|
+| **Username** | `admin` |
+| **Password** | `your password(set in the .env file)` |
+| **Role** | Super Administrator |
+
+
+For more details, see [Default Administrator Account Documentation](docs/DEFAULT_ADMIN.md).
+
+## Deployment
+
+### Method 1: Docker Deployment (Recommended)
+
+#### Prerequisites
+
+- Docker installed
+- Docker Compose installed
+
+#### Step 1: Clone the Repository
 
 ```bash
-# 1. 启动所有服务
-docker-compose up -d --build
-
-# 2. 查看日志
-docker-compose logs -f
-
-# 3. 访问服务
-# HTTP: http://localhost
-# HTTPS: https://localhost（自签名证书，浏览器会提示警告）
+git clone <repository-url>
+cd whu-campus-auth
 ```
 
-**详细说明**：[DOCKER.md](DOCKER.md)
+#### Step 2: Configure Environment Variables
 
-### 方式二：本地运行后端
+Copy the `.env.example` file to `.env` and modify the values:
 
-#### 安装依赖
+```bash
+cp .env.example .env
+```
+
+Edit `.env` file with your preferred editor:
+
+```env
+# Database Configuration
+MYSQL_ROOT_PASSWORD=your_root_password
+MYSQL_DATABASE=whu_campus_auth
+MYSQL_USER=whu_user
+MYSQL_PASSWORD=your_password
+
+# Redis Configuration (optional)
+REDIS_PASSWORD=your_redis_password
+
+# Application Configuration
+GIN_MODE=release
+SERVER_PORT=8888
+```
+
+#### Step 3: Start All Services
+
+```bash
+# Build and start all containers
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f
+
+# Check service status
+docker-compose ps
+```
+
+#### Step 4: Access the Application
+
+- **HTTP**: http://localhost
+- **HTTPS**: https://localhost (self-signed certificate, browser will show warning)
+- **Frontend**: http://localhost:3000 (development mode)
+
+#### Step 5: Stop Services
+
+```bash
+# Stop all containers
+docker-compose down
+
+# Stop and remove volumes (use with caution)
+docker-compose down -v
+```
+
+**Detailed Docker Documentation**: [DOCKER.md](DOCKER.md)
+
+---
+
+### Method 2: Local Backend Deployment
+
+#### Step 1: Install Dependencies
 
 ```bash
 go mod tidy
 ```
 
-#### 配置
+#### Step 2: Configure Database
 
-编辑 `config.yaml` 文件，配置数据库和 Redis 连接信息。
+Make sure MySQL is running, then edit `config/config.yaml`:
 
-#### 运行
+```yaml
+database:
+  host: localhost
+  port: 3306
+  user: root
+  password: your_password
+  dbname: whu_campus_auth
+  
+redis:
+  enabled: true
+  host: localhost
+  port: 6379
+  password: ""
+```
+
+#### Step 3: Run the Application
 
 ```bash
 cd cmd
 go run main.go
 ```
 
-服务器默认启动在 `http://localhost:8888`
+The server will start at `http://localhost:8888` by default.
 
-### 方式三：本地运行前端
+#### Step 4: Production Build
 
-#### 安装依赖
+```bash
+cd cmd
+go build -o whu-campus-auth.exe main.go
+./whu-campus-auth.exe
+```
+
+---
+
+### Method 3: Local Frontend Deployment
+
+#### Step 1: Install Dependencies
 
 ```bash
 cd frontend
 npm install
 ```
 
-#### 运行
+#### Step 2: Configure API Endpoint
+
+Edit `frontend/.env` or `frontend/vite.config.js` to set the backend API URL:
+
+```javascript
+// vite.config.js
+export default {
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8888',
+        changeOrigin: true
+      }
+    }
+  }
+}
+```
+
+#### Step 3: Run Development Server
 
 ```bash
 npm run dev
 ```
 
-前端服务默认启动在 `http://localhost:3000`
+The frontend will start at `http://localhost:3000` by default.
 
-#### 构建
+#### Step 4: Production Build
 
 ```bash
 npm run build
 ```
 
-## API 接口
+The built files will be in the `frontend/dist` directory.
 
-### 认证接口
-- `POST /api/auth/login` - 用户登录
-- `POST /api/auth/register` - 用户注册
+---
 
-### 用户接口
-- `GET /api/user/info` - 获取当前用户信息
-- `POST /api/user` - 创建用户
-- `PUT /api/user` - 更新用户信息
-- `PUT /api/user/password` - 修改密码
-- `GET /api/user/list` - 获取用户列表
-- `DELETE /api/user/:id` - 删除用户
-- `POST /api/user/assign-roles` - 分配角色
-- `POST /api/user/avatar` - 上传头像
+### Method 4: Production Deployment with Nginx
 
-### 角色接口
-- `GET /api/role/:id` - 获取角色详情
-- `GET /api/role/list` - 获取角色列表
-- `GET /api/role/all` - 获取所有角色
-- `POST /api/role` - 创建角色
-- `PUT /api/role` - 更新角色
-- `DELETE /api/role/:id` - 删除角色
+#### Step 1: Build Frontend
 
-### 菜单接口
-- `GET /api/menu/:id` - 获取菜单详情
-- `GET /api/menu/list` - 获取菜单列表
-- `GET /api/menu/tree` - 获取菜单树
-- `POST /api/menu` - 创建菜单
-- `PUT /api/menu` - 更新菜单
-- `DELETE /api/menu/:id` - 删除菜单
-- `GET /api/menu/role/:role_id` - 获取角色菜单
+```bash
+cd frontend
+npm install
+npm run build
+```
 
-### 字典接口
-- `GET /api/dict/:id` - 获取字典详情
-- `GET /api/dict/list` - 获取字典列表
-- `GET /api/dict/code/:code` - 根据编码获取字典
-- `POST /api/dict` - 创建字典
-- `PUT /api/dict` - 更新字典
-- `DELETE /api/dict/:id` - 删除字典
+#### Step 2: Configure Nginx
 
-### 上传接口
-- `POST /api/upload` - 上传文件
-- `DELETE /api/upload/:file_name` - 删除文件
+Use the provided Nginx configuration in `nginx/nginx.conf`:
 
-## 数据库表
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
 
-系统会自动创建以下数据表：
-- `sys_user` - 用户表
-- `sys_role` - 角色表
-- `sys_menu` - 菜单表
-- `sys_dict` - 字典表
-- `sys_dict_item` - 字典项表
-- `user_roles` - 用户角色关联表
-- `role_menus` - 角色菜单关联表
+    # Frontend static files
+    location / {
+        root /path/to/whu-campus-auth/frontend/dist;
+        try_files $uri $uri/ /index.html;
+    }
 
-## 技术栈
+    # Backend API proxy
+    location /api/ {
+        proxy_pass http://localhost:8888;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
 
-### 后端
-- **框架**: Gin
+#### Step 3: Start Backend Service
+
+```bash
+cd cmd
+go build -o whu-campus-auth main.go
+nohup ./whu-campus-auth &
+```
+
+#### Step 4: Start Nginx
+
+```bash
+sudo nginx -c /path/to/nginx/nginx.conf
+```
+
+---
+
+### Method 5: HTTPS with Let's Encrypt
+
+#### Prerequisites
+
+- Domain name pointing to your server
+- Ports 80 and 443 open
+
+#### Step 1: Install Certificate
+
+```bash
+cd scripts
+chmod +x letsencrypt.sh
+sudo ./letsencrypt.sh install your-domain.com
+```
+
+#### Step 2: Configure Nginx for HTTPS
+
+Update `nginx/nginx.conf` with SSL configuration (see `nginx/nginx.conf` for details).
+
+#### Step 3: Auto-renew Certificate
+
+```bash
+# Add to crontab
+sudo crontab -e
+
+# Add this line for monthly renewal
+0 0 1 * * /path/to/scripts/letsencrypt.sh renew
+```
+
+**Detailed HTTPS Documentation**: [LETS-ENCRYPT.md](LETS-ENCRYPT.md)
+
+---
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
+
+### User Management
+- `GET /api/user/info` - Get current user info
+- `POST /api/user` - Create user
+- `PUT /api/user` - Update user info
+- `PUT /api/user/password` - Change password
+- `GET /api/user/list` - Get user list
+- `DELETE /api/user/:id` - Delete user
+- `POST /api/user/assign-roles` - Assign roles
+- `POST /api/user/avatar` - Upload avatar
+
+### Role Management
+- `GET /api/role/:id` - Get role details
+- `GET /api/role/list` - Get role list
+- `GET /api/role/all` - Get all roles
+- `POST /api/role` - Create role
+- `PUT /api/role` - Update role
+- `DELETE /api/role/:id` - Delete role
+
+### Menu Management
+- `GET /api/menu/:id` - Get menu details
+- `GET /api/menu/list` - Get menu list
+- `GET /api/menu/tree` - Get menu tree
+- `POST /api/menu` - Create menu
+- `PUT /api/menu` - Update menu
+- `DELETE /api/menu/:id` - Delete menu
+- `GET /api/menu/role/:role_id` - Get role menus
+
+### Dictionary Management
+- `GET /api/dict/:id` - Get dictionary details
+- `GET /api/dict/list` - Get dictionary list
+- `GET /api/dict/code/:code` - Get dictionary by code
+- `POST /api/dict` - Create dictionary
+- `PUT /api/dict` - Update dictionary
+- `DELETE /api/dict/:id` - Delete dictionary
+
+### File Upload
+- `POST /api/upload` - Upload file
+- `DELETE /api/upload/:file_name` - Delete file
+
+## Database Tables
+
+The system automatically creates the following tables:
+- `sys_user` - User table
+- `sys_role` - Role table
+- `sys_menu` - Menu table
+- `sys_dict` - Dictionary table
+- `sys_dict_item` - Dictionary item table
+- `user_roles` - User-Role relationship table
+- `role_menus` - Role-Menu relationship table
+
+## Tech Stack
+
+### Backend
+- **Framework**: Gin
 - **ORM**: GORM
-- **认证**: JWT
-- **缓存**: Redis (可选)
-- **密码加密**: bcrypt
-- **日志**: Zap
-- **权限控制**: Casbin RBAC
+- **Authentication**: JWT
+- **Cache**: Redis (optional)
+- **Password Encryption**: bcrypt
+- **Logging**: Zap
+- **Authorization**: Casbin RBAC
 
-### 前端
-- **框架**: Vue 3
-- **构建工具**: Vite
-- **UI 组件库**: Element Plus
-- **状态管理**: Pinia
-- **路由**: Vue Router
-- **HTTP 客户端**: Axios
+### Frontend
+- **Framework**: Vue 3
+- **Build Tool**: Vite
+- **UI Library**: Element Plus
+- **State Management**: Pinia
+- **Router**: Vue Router
+- **HTTP Client**: Axios
 
-### 运维
-- **反向代理**: Nginx
-- **容器化**: Docker & Docker Compose
+### DevOps
+- **Reverse Proxy**: Nginx
+- **Containerization**: Docker & Docker Compose
 - **HTTPS**: Let's Encrypt
 
-## 文档
+## Documentation
 
-- [Docker 部署说明](DOCKER.md)
-- [Let's Encrypt 证书管理](LETS-ENCRYPT.md)
-- [Docker 优化指南](DOCKER-OPTIMIZATION.md)
-- [运维脚本说明](scripts/README.md)
+- [Docker Deployment Guide](DOCKER.md)
+- [Let's Encrypt Certificate Management](LETS-ENCRYPT.md)
+- [Docker Optimization Guide](DOCKER-OPTIMIZATION.md)
+- [Operations Scripts](scripts/README.md)
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database Connection Failed**
+   - Check MySQL service is running
+   - Verify database credentials in `config.yaml`
+   - Ensure database exists
+
+2. **Port Already in Use**
+   - Change `SERVER_PORT` in `.env` or `config.yaml`
+   - Check if another service is using the port
+
+3. **Frontend Cannot Connect to Backend**
+   - Verify backend API URL in frontend configuration
+   - Check CORS settings
+   - Ensure backend service is running
+
+4. **Docker Build Fails**
+   - Clean Docker cache: `docker system prune`
+   - Rebuild without cache: `docker-compose build --no-cache`
 
 ## License
 

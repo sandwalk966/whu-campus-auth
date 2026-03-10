@@ -78,12 +78,16 @@ const handleLogin = async () => {
       loading.value = true
       try {
         const result = await userStore.login(loginForm.username, loginForm.password)
-        if (result.code === 0) {
+        console.log('Login result:', result)
+        if (result.code === 0 || result.code === 200) {
           ElMessage.success('Login successful')
-          router.push('/dashboard')
+          // 使用 nextTick 确保状态更新后再跳转
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 100)
         }
       } catch (error) {
-        console.error(error)
+        console.error('Login error:', error)
       } finally {
         loading.value = false
       }

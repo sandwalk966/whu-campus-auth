@@ -1,6 +1,7 @@
 package api
 
 import (
+	"time"
 	"whu-campus-auth/service"
 	"whu-campus-auth/utils"
 
@@ -19,7 +20,6 @@ func NewAuthAPI() *AuthAPI {
 
 // Logout 用户登出
 func (api *AuthAPI) Logout(c *gin.Context) {
-	// 获取 token
 	token := utils.GetTokenFromRequest(c)
 
 	if token == "" {
@@ -27,28 +27,26 @@ func (api *AuthAPI) Logout(c *gin.Context) {
 		return
 	}
 
-	// 解析 token 获取过期时间
 	j := utils.NewJWT()
 	claims, err := j.ParseToken(token)
 	if err != nil {
-		// token 无效，直接返回成功（反正已经不能用了）
 		utils.SuccessWithMessage(c, "Logged out successfully")
 		return
 	}
 
-	// 计算 token 剩余有效时间
-	expiresAt := claims.ExpiresAt.Unix() - int64(utils.NewJWT().BufferTime.Seconds())
+	expiresAt := claims.ExpiresAt.Unix() - time.Now().Unix()
 	if expiresAt < 0 {
 		expiresAt = 0
 	}
 
-	// 将 token 加入黑名单（使用 token 的剩余有效期）
-	err = api.redisService.AddTokenToBlacklist(token, utils.NewJWT().ExpiresTime)
+	err = api.redisService.AddTokenToBlacklist(token, time.Duration(expiresAt)*time.Second)
 	if err != nil {
 		utils.LogErrorf("Logout failed: %v", err)
 		utils.ErrorWithMessage(c, "Logout failed, please try again later")
 		return
 	}
+
+	api.redisService.DeleteUserToken(claims.ID)
 
 	utils.SuccessWithMessage(c, "Logged out successfully")
 }

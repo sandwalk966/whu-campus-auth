@@ -160,7 +160,17 @@ func (api *UserAPI) Register(c *gin.Context) {
 
 func (api *UserAPI) GetUserInfo(c *gin.Context) {
 	userID, _ := c.Get("userId")
-	userId := utils.ParseID(userID.(string))
+	// Fix: userID is uint, not string
+	var userId uint
+	switch v := userID.(type) {
+	case uint:
+		userId = v
+	case float64: // JSON 解析后可能是 float64
+		userId = uint(v)
+	default:
+		utils.ErrorWithMessage(c, "Invalid user ID type")
+		return
+	}
 
 	// 直接调用 Service 层的带缓存方法（不关心缓存细节）
 	user, err := api.userService.GetUserByIDWithCache(userId)

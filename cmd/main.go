@@ -37,10 +37,14 @@ func main() {
 	initializer.AutoMigrate(db)
 
 	// 初始化默认管理员账户（先于字典和菜单初始化）
-	initializer.InitAdminUser(db)
-	
+	if err := initializer.InitAdminUser(db); err != nil {
+		initializer.LogFatalf("初始化管理员账户失败：%v", err)
+	}
+
 	// 初始化默认菜单
-	initializer.InitMenus(db)
+	if err := initializer.InitMenus(db); err != nil {
+		initializer.LogFatalf("初始化菜单失败：%v", err)
+	}
 
 	// 初始化全局数据库连接（供 middleware 使用）
 	middleware.InitDB(db)
