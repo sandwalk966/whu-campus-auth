@@ -52,27 +52,40 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   
-  console.log('路由守卫 - from:', from.path, 'to:', to.path, 'hasToken:', !!userStore.token)
+  // 如果有 token 但没有用户信息，先获取用户信息（页面刷新场景）
+  if (userStore.token && !userStore.userInfo) {
+    try {
+      await userStore.initUserInfo()
+    } catch (error) {
+      console.error('路由守卫初始化用户信息失败:', error)
+      // 只在确认 token 过期（401）时才清除并跳转
+      if (error.response && error.response.status === 401) {
+        console.log('Token 已过期，清除登录状态')
+        userStore.logout()
+        next('/login')
+        return
+      }
+      // 其他错误（如 500）保留 token，可能是后端临时问题，继续访问
+      console.log('非 401 错误，保留 token 继续访问')
+    }
+  }
   
   // 如果要去登录页且已有 token，直接跳转到首页
   if (to.path === '/login' && userStore.token) {
-    console.log('已有 token，从登录页跳转到 dashboard')
     next('/dashboard')
     return
   }
   
   // 如果要去非登录页但没有 token，跳转到登录页
   if (to.path !== '/login' && !userStore.token) {
-    console.log('没有 token，跳转到登录页')
     next('/login')
     return
   }
   
   // 其他情况正常访问
-  console.log('允许访问:', to.path)
   next()
 })
 

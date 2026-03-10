@@ -7,6 +7,23 @@ export const useUserStore = defineStore('user', () => {
   const userInfo = ref(null)
   const userMenus = ref([])
 
+  // Initialize user info on page refresh
+  async function initUserInfo() {
+    if (token.value && !userInfo.value) {
+      try {
+        await getUserInfo()
+      } catch (error) {
+        console.error('Failed to initialize user info:', error)
+        // 只在 token 过期时清除（401 错误）
+        if (error.response && error.response.status === 401) {
+          console.log('Token 已过期，清除登录状态')
+          logout()
+        }
+        // 其他错误（如 500）不清除 token，可能是后端临时问题
+      }
+    }
+  }
+
   // Login
   async function login(username, password) {
     const response = await request.post('/api/auth/login', {
@@ -35,14 +52,14 @@ export const useUserStore = defineStore('user', () => {
     console.log('=== getUserInfo response ===', response)
     if (response.code === 0 || response.code === 200) {
       userInfo.value = response.data
-      console.log('userInfo set to:', response.data)
+      console.log('userInfo set to:', JSON.stringify(response.data, null, 2))
       // Extract menus from user information
       if (response.data.roles && response.data.roles.length > 0) {
         console.log('Roles found:', response.data.roles.length)
         // Merge menus from all roles
         const allMenus = []
-        response.data.roles.forEach(role => {
-          console.log('Role:', role.name, 'menus count:', role.menus ? role.menus.length : 0)
+        response.data.roles.forEach((role, index) => {
+          console.log(`Role ${index}:`, role.name, 'menus:', role.menus)
           if (role.menus && role.menus.length > 0) {
             allMenus.push(...role.menus)
           }
@@ -52,9 +69,9 @@ export const useUserStore = defineStore('user', () => {
         const uniqueMenus = Array.from(new Map(allMenus.map(menu => [menu.id, menu])).values())
         console.log('Unique menus:', uniqueMenus.length)
         userMenus.value = buildMenuTree(uniqueMenus)
-        console.log('Menu tree:', userMenus.value)
+        console.log('Menu tree:', JSON.stringify(userMenus.value, null, 2))
       } else {
-        console.log('No roles found or roles is empty')
+        console.log('No roles found or roles is empty. roles:', response.data.roles)
       }
     }
     return response
@@ -107,6 +124,7 @@ export const useUserStore = defineStore('user', () => {
     userMenus,
     login,
     getUserInfo,
+    initUserInfo,
     setMenus,
     logout
   }
