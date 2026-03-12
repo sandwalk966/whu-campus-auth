@@ -138,13 +138,13 @@ func (s *UserService) Register(registerReq req.RegisterRequest) error {
 func (s *UserService) GetUserByID(id uint) (*db.User, error) {
 	// 先从缓存中读取
 	cacheKey := s.redisService.GetUserCacheKey(id)
-	user, err := s.redisService.GetUserFromCache(id)
-	if err == nil && user != nil {
-		return user, nil
-	}
+	//user, err := s.redisService.GetUserFromCache(id)
+	// if err == nil && user != nil {
+	// 	return user, nil
+	// }
 
 	// 缓存未命中，从数据库读取
-	user, err = s.userDAO.GetByID(id)
+	user, err := s.userDAO.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
