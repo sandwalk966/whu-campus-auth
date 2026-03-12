@@ -47,7 +47,7 @@ func InitAdminUser(db *gorm.DB) error {
 		// 管理员账户不存在，创建之
 		password := os.Getenv("ADMIN_PASSWORD")
 		if password == "" {
-			password = "admin123"
+			password = "abcdefgh9"
 		}
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
@@ -104,8 +104,7 @@ func InitAdminUser(db *gorm.DB) error {
 	}
 
 	// 3. 初始化默认字典数据（如果还没有）
-	// TODO: 临时注释，测试用
-	// InitDictData(db)
-	
+	InitDictData(db)
+
 	return nil
 }

@@ -62,3 +62,6 @@ temp/
 
 #https certs
 ssl/
+
+# nginx config
+nginx/

@@ -2,6 +2,7 @@ package db
 
 import (
 	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -19,7 +20,6 @@ type Menu struct {
 	Type      int            `gorm:"default:1" json:"type"`
 	Status    int            `gorm:"default:1" json:"status"`
 	Children  []Menu         `gorm:"foreignKey:ParentID" json:"children"`
-	Roles     []Role         `gorm:"many2many:role_menus;" json:"roles"`
 }
 
 func (Menu) TableName() string {

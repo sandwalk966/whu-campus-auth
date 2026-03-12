@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"whu-campus-auth/model/db"
 
 	"gorm.io/gorm"
@@ -71,7 +72,16 @@ func (dao *UserDAO) GetList(page, pageSize int, username string, status int) ([]
 }
 
 func (dao *UserDAO) PreloadRoles(user *db.User) error {
-	return dao.db.Preload("Roles.Menus").First(user, user.ID).Error
+	result := dao.db.Preload("Roles.Menus").First(user, user.ID).Error
+	fmt.Printf("PreloadRoles 调试 - user_id: %d, roles_count: %d, error: %v\n", user.ID, len(user.Roles), result)
+	
+	// 打印每个 role 的 menus 数量
+	for i, role := range user.Roles {
+		fmt.Printf("Role 信息 - index: %d, role_id: %d, role_name: %s, menus_count: %d\n", 
+			i, role.ID, role.Name, len(role.Menus))
+	}
+	
+	return result
 }
 
 func (dao *UserDAO) AssignRoles(userID uint, roleIDs []uint) error {

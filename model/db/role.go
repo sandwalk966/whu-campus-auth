@@ -2,6 +2,7 @@ package db
 
 import (
 	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -14,8 +15,8 @@ type Role struct {
 	Code      string         `gorm:"size:50;uniqueIndex;not null" json:"code"`
 	Desc      string         `gorm:"size:200" json:"desc"`
 	Status    int            `gorm:"default:1" json:"status"`
-	Menus     []Menu         `gorm:"many2many:role_menus;" json:"menus"`
-	Users     []User         `gorm:"many2many:user_roles;" json:"users"`
+	Menus     []Menu         `gorm:"many2many:role_menus;joinForeignKey:role_id;joinReferences:menu_id" json:"menus"`
+	Users     []User         `gorm:"many2many:user_roles;joinForeignKey:user_id;joinReferences:role_id" json:"users"`
 }
 
 func (Role) TableName() string {
